@@ -1,6 +1,6 @@
 // Wiener Linien API Configuration
 const API_BASE = 'https://www.wienerlinien.at';
-const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+const CORS_PROXY = 'https://api.allorigins.win/get?url=';
 
 // State
 let map = null;
@@ -163,7 +163,14 @@ async function loadDepartures(station) {
             throw new Error('Proxy-Fehler: Keine JSON-Antwort erhalten');
         }
         
-        const data = await response.json();
+        const wrapper = await response.json();
+        
+        // allorigins.win/get wraps response in {contents: "..."}
+        if (!wrapper.contents) {
+            throw new Error('Proxy-Fehler: Ungültige Antwortstruktur');
+        }
+        
+        const data = JSON.parse(wrapper.contents);
         
         if (data.data && data.data.monitors) {
             displayDepartures(station, data.data.monitors);
