@@ -20,10 +20,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Load Stations from JSON
 async function loadStations() {
     try {
-        const response = await fetch('stations.json');
+        const response = await fetch('stations_full.json');
         if (!response.ok) throw new Error('Failed to load stations');
-        stations = await response.json();
-        console.log(`Loaded ${stations.length} stations`);
+        const data = await response.json();
+        
+        // Transform data structure: longitude->lon, latitude->lat, rbls[0]->rbl
+        stations = data.stations
+            .filter(s => s.rbls && s.rbls.length > 0) // Only stations with RBL
+            .map(s => ({
+                name: s.name,
+                municipality: s.municipality,
+                lat: s.latitude,
+                lon: s.longitude,
+                rbl: parseInt(s.rbls[0]) // Use first RBL
+            }));
+        
+        console.log(`Loaded ${stations.length} stations from ${data.stations.length} total`);
     } catch (error) {
         console.error('Error loading stations:', error);
         stations = [];
