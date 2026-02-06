@@ -396,6 +396,20 @@ async function loadDepartures(station) {
             .filter(r => r !== null)
             .flat();
         
+        // Debug: Log RBL sources for U1 analysis
+        if (fullStation.name.includes('Kagraner') && !window._rblAnalysis) {
+            console.log('=== RBL Analysis for Kagraner Platz ===');
+            allMonitors.forEach((monitor, idx) => {
+                const u1Lines = monitor.lines?.filter(l => l.name === 'U1');
+                if (u1Lines && u1Lines.length > 0) {
+                    u1Lines.forEach(line => {
+                        console.log(`Monitor ${idx}: U1 → ${line.towards?.trim()}, Platform ${line.platform}, Departures: ${line.departures?.departure?.length || 0}`);
+                    });
+                }
+            });
+            window._rblAnalysis = true;
+        }
+        
         if (allMonitors.length > 0) {
             displayDepartures(fullStation, allMonitors);
         } else {
@@ -424,12 +438,13 @@ function displayDepartures(station, monitors) {
     }
 
     // Collect all departures
-    const allDepartures = monitors.flatMap(monitor => 
+    const allDepartures = monitors.flatMap((monitor, monitorIndex) => 
         monitor.lines?.flatMap(line => 
             line.departures?.departure?.map(dep => {
                 // Log raw API structure to find destination field
                 if (line.name === 'U1' && !window._u1Logged) {
                     console.log('U1 Raw API data:', JSON.stringify({
+                        rbl: monitor.locationStop?.properties?.name || 'unknown',
                         line: line,
                         departure: dep
                     }, null, 2));
@@ -437,7 +452,7 @@ function displayDepartures(station, monitors) {
                 }
                 
                 // Try to get the most specific destination
-                // API structure: dep.vehicle?.towards or dep.vehicle?.direction or line.towards
+                // API structure: dep.vehicle?.towards or line.towards
                 const finalDestination = dep.vehicle?.towards || 
                                        dep.vehicle?.direction?.value || 
                                        dep.vehicle?.destination || 
@@ -448,6 +463,7 @@ function displayDepartures(station, monitors) {
                     towards: line.towards,
                     destination: finalDestination,
                     platform: line.platform,
+                    rblSource: monitor.locationStop?.properties?.name || monitorIndex,
                     countdown: dep.departureTime?.countdown,
                     timeReal: dep.departureTime?.timeReal,
                     timePlanned: dep.departureTime?.timePlanned,
@@ -463,6 +479,23 @@ function displayDepartures(station, monitors) {
     if (allDepartures.length > 0 && !window._sampleLogged) {
         console.log('Sample departure data:', allDepartures[0]);
         window._sampleLogged = true;
+    }
+    
+    // Debug: Analyze U1 destinations by RBL
+    if (station.name.includes('Kagraner') && !window._u1Analysis) {
+        const u1Deps = allDepartures.filter(d => d.line === 'U1');
+        console.log('U1 Analysis at Kagraner Platz:');
+        console.log(`Total U1 departures: ${u1Deps.length}`);
+        
+        const byDestination = {};
+        u1Deps.forEach(d => {
+            const key = d.destination?.trim();
+            if (!byDestination[key]) byDestination[key] = [];
+            byDestination[key].push(d.countdown);
+        });
+        
+        console.log('U1 by destination:', byDestination);
+        window._u1Analysis = true;
     }
 
     // Remove duplicates: prefer entries with timeReal
