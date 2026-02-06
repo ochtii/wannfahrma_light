@@ -234,13 +234,7 @@ function initTabs() {
                 stopAutoRefresh();
                 const results = document.getElementById('results');
                 if (results) results.innerHTML = '';
-                // Keep currentStation so we can reload when returning
-            }
-            
-            // When RETURNING to station tab with existing station
-            if (tabName === 'station' && currentStation && previousTab !== 'station') {
-                // Reload the station to restart auto-refresh
-                setTimeout(() => loadDepartures(currentStation), 100);
+                currentStation = null; // Clear station completely
             }
 
             if (tabName === 'map' && map) {
