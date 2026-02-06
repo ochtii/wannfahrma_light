@@ -396,20 +396,6 @@ async function loadDepartures(station) {
             .filter(r => r !== null)
             .flat();
         
-        // Debug: Log RBL sources for U1 analysis
-        if (fullStation.name.includes('Kagraner') && !window._rblAnalysis) {
-            console.log('=== RBL Analysis for Kagraner Platz ===');
-            allMonitors.forEach((monitor, idx) => {
-                const u1Lines = monitor.lines?.filter(l => l.name === 'U1');
-                if (u1Lines && u1Lines.length > 0) {
-                    u1Lines.forEach(line => {
-                        console.log(`Monitor ${idx}: U1 → ${line.towards?.trim()}, Platform ${line.platform}, Departures: ${line.departures?.departure?.length || 0}`);
-                    });
-                }
-            });
-            window._rblAnalysis = true;
-        }
-        
         if (allMonitors.length > 0) {
             displayDepartures(fullStation, allMonitors);
         } else {
@@ -441,22 +427,15 @@ function displayDepartures(station, monitors) {
     const allDepartures = monitors.flatMap((monitor, monitorIndex) => 
         monitor.lines?.flatMap(line => 
             line.departures?.departure?.map(dep => {
-                // Log raw API structure to find destination field
-                if (line.name === 'U1' && !window._u1Logged) {
-                    console.log('U1 Raw API data:', JSON.stringify({
-                        rbl: monitor.locationStop?.properties?.name || 'unknown',
-                        line: line,
-                        departure: dep
-                    }, null, 2));
-                    window._u1Logged = true;
-                }
-                
                 // Try to get the most specific destination
                 // API structure: dep.vehicle?.towards or line.towards
-                const finalDestination = dep.vehicle?.towards || 
+                const rawDestination = dep.vehicle?.towards || 
                                        dep.vehicle?.direction?.value || 
                                        dep.vehicle?.destination || 
                                        line.towards;
+                
+                // Normalize destination: trim whitespace and convert to uppercase for consistency
+                const finalDestination = rawDestination?.trim().toUpperCase() || 'UNBEKANNT';
                 
                 return {
                     line: line.name,
@@ -468,33 +447,16 @@ function displayDepartures(station, monitors) {
                     timeReal: dep.departureTime?.timeReal,
                     timePlanned: dep.departureTime?.timePlanned,
                     type: line.type,
-                    lineType: determineLineType(line.name, line.type),
-                    _raw: dep // Keep raw data for debugging
+                    lineType: determineLineType(line.name, line.type)
                 };
             }) || []
         ) || []
     );
     
-    // Debug: Log first departure to see API structure
-    if (allDepartures.length > 0 && !window._sampleLogged) {
-        console.log('Sample departure data:', allDepartures[0]);
-        window._sampleLogged = true;
-    }
-    
-    // Debug: Analyze U1 destinations by RBL
+    // Debug: Analyze U1 destinations by RBL (only for Kagraner Platz)
     if (station.name.includes('Kagraner') && !window._u1Analysis) {
         const u1Deps = allDepartures.filter(d => d.line === 'U1');
-        console.log('U1 Analysis at Kagraner Platz:');
-        console.log(`Total U1 departures: ${u1Deps.length}`);
-        
-        const byDestination = {};
-        u1Deps.forEach(d => {
-            const key = d.destination?.trim();
-            if (!byDestination[key]) byDestination[key] = [];
-            byDestination[key].push(d.countdown);
-        });
-        
-        console.log('U1 by destination:', byDestination);
+        console.log(`✅ U1 at ${station.name}: ${u1Deps.length} departures → ${new Set(u1Deps.map(d => d.destination)).size} destinations (${Array.from(new Set(u1Deps.map(d => d.destination))).join(', ')})`);
         window._u1Analysis = true;
     }
 
@@ -513,25 +475,27 @@ function displayDepartures(station, monitors) {
         // Create unique key from line, destination, and countdown
         // Round countdown to avoid duplicates with slight time differences
         const roundedCountdown = Math.floor((dep.countdown || 0) / 1) * 1; // 1 minute tolerance
-        const key = `${dep.line}|${dep.destination}|${roundedCountdown}`;
+        const normalizedDest = dep.destination?.trim().toUpperCase() || 'UNBEKANNT';
+        const key = `${dep.line}|${normalizedDest}|${roundedCountdown}`;
         
         if (!seenKeys.has(key)) {
             seenKeys.add(key);
             deduped.push(dep);
         } else {
-            // Duplicate found - only happens when live and planned data exist for same departure
-            console.log(`Removed duplicate: ${dep.line} → ${dep.destination} in ${dep.countdown}min (${dep.timeReal ? 'had live data' : 'was planned only'})`);
+            // Duplicate found
+            console.log(`Removed duplicate: ${dep.line} → ${normalizedDest} in ${dep.countdown}min`);
         }
     });
 
     // Group by line + destination (not just towards)
     const grouped = {};
     deduped.forEach(dep => {
-        const key = `${dep.line}|${dep.destination || dep.towards || 'Unbekannt'}`;
+        const normalizedDest = dep.destination?.trim().toUpperCase() || 'UNBEKANNT';
+        const key = `${dep.line}|${normalizedDest}`;
         if (!grouped[key]) {
             grouped[key] = {
                 line: dep.line,
-                destination: dep.destination || dep.towards,
+                destination: normalizedDest,
                 lineType: dep.lineType,
                 platform: dep.platform,
                 departures: []
