@@ -44,9 +44,10 @@ async function loadStations() {
                 municipality: s.municipality,
                 lat: s.latitude,
                 lon: s.longitude,
-                rbl: Math.floor(parseFloat(s.rbls[0])) // Convert "2093.0" to 2093
+                rbl: Math.floor(parseFloat(s.rbls[0])), // Convert "2093.0" to 2093
+                rbls: s.rbls.map(r => Math.floor(parseFloat(r))).filter(r => !isNaN(r) && r > 0) // All RBLs
             }))
-            .filter(s => !isNaN(s.rbl) && s.rbl > 0); // Remove invalid RBLs
+            .filter(s => !isNaN(s.rbl) && s.rbl > 0 && s.rbls.length > 0); // Remove invalid RBLs
         
         console.log(`Loaded ${stations.length} stations from ${data.stations.length} total`);
     } catch (error) {
@@ -258,7 +259,7 @@ function initStationSearch() {
 }
 
 // Search Stations
-async function searchStations(query) {
+function searchStations(query) {
     return getStations().filter(s => 
         s.name.toLowerCase().includes(query.toLowerCase())
     );
@@ -268,7 +269,7 @@ async function searchStations(query) {
 function displaySuggestions(stations) {
     const suggestions = document.getElementById('suggestions');
     
-    if (stations.length === 0) {
+    if (!stations || !Array.isArray(stations) || stations.length === 0) {
         suggestions.innerHTML = '<div class="empty-message">Keine Stationen gefunden</div>';
         return;
     }
@@ -280,7 +281,7 @@ function displaySuggestions(stations) {
                 <small>${station.municipality || ''}</small>
             </div>
             <button class="favorite-btn ${isFavorite(station.rbl) ? 'active' : ''}" 
-                    onclick="event.stopPropagation(); toggleFavorite(${JSON.stringify(station).replace(/"/g, '&quot;')}); displaySuggestions(searchStations(document.getElementById('station-input').value));" 
+                    onclick="event.stopPropagation(); toggleFavorite(${JSON.stringify(station).replace(/"/g, '&quot;')}); const query = document.getElementById('station-input').value; if(query) displaySuggestions(searchStations(query));" 
                     title="${isFavorite(station.rbl) ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}">
                 ⭐
             </button>
@@ -296,37 +297,55 @@ async function loadDepartures(station) {
     addRecentSearch(station);
     
     try {
-        const apiUrl = `${API_BASE}/ogd_realtime/monitor?rbl=${station.rbl}`;
-        const url = `${CORS_PROXY}${encodeURIComponent(apiUrl)}`;
+        // Use all RBLs for the station (fallback to single rbl for backwards compatibility)
+        const rbls = station.rbls || [station.rbl];
         
-        console.log('Fetching:', url);
+        console.log(`Loading departures for ${station.name} from ${rbls.length} RBL(s)`);
         
-        const response = await fetch(url);
+        // Fetch data for all RBLs in parallel
+        const fetchPromises = rbls.slice(0, 10).map(async (rbl) => {
+            try {
+                const apiUrl = `${API_BASE}/ogd_realtime/monitor?rbl=${rbl}`;
+                const url = `${CORS_PROXY}${encodeURIComponent(apiUrl)}`;
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    console.warn(`RBL ${rbl} failed: HTTP ${response.status}`);
+                    return null;
+                }
+                
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    console.warn(`RBL ${rbl} failed: Non-JSON response`);
+                    return null;
+                }
+                
+                const wrapper = await response.json();
+                
+                if (!wrapper.contents) {
+                    console.warn(`RBL ${rbl} failed: Invalid structure`);
+                    return null;
+                }
+                
+                const data = JSON.parse(wrapper.contents);
+                
+                return data.data?.monitors || data.message?.value?.monitors || [];
+            } catch (error) {
+                console.warn(`RBL ${rbl} error:`, error.message);
+                return null;
+            }
+        });
         
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
+        const results = await Promise.all(fetchPromises);
         
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            const text = await response.text();
-            console.error('Non-JSON response:', text.substring(0, 200));
-            throw new Error('Proxy-Fehler: Keine JSON-Antwort erhalten');
-        }
+        // Merge all monitors from all RBLs
+        const allMonitors = results
+            .filter(r => r !== null)
+            .flat();
         
-        const wrapper = await response.json();
-        
-        // allorigins.win/get wraps response in {contents: "..."}
-        if (!wrapper.contents) {
-            throw new Error('Proxy-Fehler: Ungültige Antwortstruktur');
-        }
-        
-        const data = JSON.parse(wrapper.contents);
-        
-        if (data.data && data.data.monitors) {
-            displayDepartures(station, data.data.monitors);
-        } else if (data.message && data.message.value && data.message.value.monitors) {
-            displayDepartures(station, data.message.value.monitors);
+        if (allMonitors.length > 0) {
+            displayDepartures(station, allMonitors);
         } else {
             showError('Keine Abfahrtsdaten verfügbar');
         }
@@ -527,7 +546,7 @@ function displayNearbyStations(stations, userLat, userLon) {
                         </div>
                     </div>
                     <button class="favorite-btn ${isFavorite(station.rbl) ? 'active' : ''}" 
-                            onclick="event.stopPropagation(); toggleFavorite(${JSON.stringify(station).replace(/"/g, '&quot;')}); displayNearbyStations(getStations().filter(s => calculateDistance(${userLat}, ${userLon}, s.lat, s.lon) <= ${Math.max(distance + 100, 500)}).sort((a,b) => calculateDistance(${userLat}, ${userLon}, a.lat, a.lon) - calculateDistance(${userLat}, ${userLon}, b.lat, b.lon)), ${userLat}, ${userLon});" 
+                            onclick="event.stopPropagation(); toggleFavorite(${JSON.stringify(station).replace(/"/g, '&quot;')}); this.classList.toggle('active');" 
                             title="${isFavorite(station.rbl) ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}">
                         ⭐
                     </button>
