@@ -306,42 +306,61 @@ async function loadDepartures(station) {
         
         console.log(`Loading departures for ${fullStation.name} from ${rbls.length} RBL(s): ${rbls.join(', ')}`);
         
-        // Fetch data for all RBLs in parallel (limit to 15 to avoid too many requests)
-        const fetchPromises = rbls.slice(0, 15).map(async (rbl) => {
-            try {
-                const apiUrl = `${API_BASE}/ogd_realtime/monitor?rbl=${rbl}`;
-                const url = `${CORS_PROXY}${encodeURIComponent(apiUrl)}`;
-                
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    console.warn(`RBL ${rbl} failed: HTTP ${response.status}`);
-                    return null;
-                }
-                
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    console.warn(`RBL ${rbl} failed: Non-JSON response`);
-                    return null;
-                }
-                
-                const wrapper = await response.json();
-                
-                if (!wrapper.contents) {
-                    console.warn(`RBL ${rbl} failed: Invalid structure`);
-                    return null;
-                }
-                
-                const data = JSON.parse(wrapper.contents);
-                
-                return data.data?.monitors || data.message?.value?.monitors || [];
-            } catch (error) {
-                console.warn(`RBL ${rbl} error:`, error.message);
-                return null;
-            }
-        });
+        // Batch loading to avoid overwhelming the CORS proxy
+        // Load RBLs in batches of 3 with delay between batches
+        const BATCH_SIZE = 3;
+        const BATCH_DELAY = 500; // ms between batches
         
-        const results = await Promise.all(fetchPromises);
+        const allResults = [];
+        
+        for (let i = 0; i < Math.min(rbls.length, 15); i += BATCH_SIZE) {
+            const batch = rbls.slice(i, i + BATCH_SIZE);
+            console.log(`Loading batch ${Math.floor(i / BATCH_SIZE) + 1}: RBLs ${batch.join(', ')}`);
+            
+            const batchPromises = batch.map(async (rbl) => {
+                try {
+                    const apiUrl = `${API_BASE}/ogd_realtime/monitor?rbl=${rbl}`;
+                    const url = `${CORS_PROXY}${encodeURIComponent(apiUrl)}`;
+                    
+                    const response = await fetch(url);
+                    
+                    if (!response.ok) {
+                        console.warn(`RBL ${rbl} failed: HTTP ${response.status}`);
+                        return null;
+                    }
+                    
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        console.warn(`RBL ${rbl} failed: Non-JSON response`);
+                        return null;
+                    }
+                    
+                    const wrapper = await response.json();
+                    
+                    if (!wrapper.contents) {
+                        console.warn(`RBL ${rbl} failed: Invalid structure`);
+                        return null;
+                    }
+                    
+                    const data = JSON.parse(wrapper.contents);
+                    
+                    return data.data?.monitors || data.message?.value?.monitors || [];
+                } catch (error) {
+                    console.warn(`RBL ${rbl} error:`, error.message);
+                    return null;
+                }
+            });
+            
+            const batchResults = await Promise.all(batchPromises);
+            allResults.push(...batchResults);
+            
+            // Delay between batches (except for last batch)
+            if (i + BATCH_SIZE < Math.min(rbls.length, 15)) {
+                await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
+            }
+        }
+        
+        const results = allResults;
         
         // Merge all monitors from all RBLs
         const allMonitors = results
