@@ -24,9 +24,7 @@ Die App ist live auf GitHub Pages verfügbar:
 
 Die App nutzt die **öffentliche Wiener Linien OGD API** ohne API-Schlüssel.
 
-**⚠️ CORS-Einschränkung:** Die Wiener Linien API erlaubt keine direkten Browser-Anfragen von externen Domains (CORS-Policy). Die API funktioniert nur in nativen Apps (wie Android/iOS), nicht in Web-Apps die auf GitHub Pages gehostet sind.
-
-**Lösung:** Um Live-Daten zu erhalten, müssten Sie die App lokal ausführen mit deaktivierter CORS-Policy oder ein Backend erstellen.
+**CORS-Lösung:** Da die Wiener Linien API keine direkten Browser-Anfragen von externen Domains erlaubt, verwendet die App den öffentlichen CORS-Proxy `api.codetabs.com`. Dieser leitet die Anfragen weiter und fügt die notwendigen CORS-Header hinzu, damit die App im Browser funktioniert.
 
 ## 🛠️ Installation und Einrichtung
 
@@ -144,19 +142,11 @@ MIT License - Siehe [LICENSE](LICENSE) für Details
 
 ## 🐛 Bekannte Probleme
 
-- **CORS-Blockierung:** Die Wiener Linien API blockiert Browser-Anfragen von GitHub Pages
+- CORS-Proxy kann gelegentlich langsam oder überlastet sein
 - Einige kleinere Stationen könnten nicht in den Stationsdaten enthalten sein
 - Echtzeitdaten können bei Störungen ungenau sein
 
-**Workaround für lokale Entwicklung:**
-```bash
-# Chrome mit deaktivierter CORS-Policy starten (nur für Entwicklung!)
-# macOS/Linux:
-open -na "Google Chrome" --args --disable-web-security --user-data-dir=/tmp/chrome_dev
-
-# Windows:
-chrome.exe --disable-web-security --user-data-dir=C:\temp\chrome_dev
-```
+**Alternative CORS-Proxies:** Falls `api.codetabs.com` nicht verfügbar ist, können andere Proxies wie `https://corsproxy.io/?` verwendet werden (siehe `script.js`).
 
 ## 📞 Kontakt
 

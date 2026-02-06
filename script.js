@@ -1,5 +1,6 @@
 // Wiener Linien API Configuration
 const API_BASE = 'https://www.wienerlinien.at';
+const CORS_PROXY = 'https://api.codetabs.com/v1/proxy?quest=';
 
 // State
 let map = null;
@@ -111,19 +112,17 @@ function displaySuggestions(stations) {
     `).join('');
 }
 
-// Load Departures - Direkter API-Call
+// Load Departures - Mit CORS-Proxy
 async function loadDepartures(station) {
     showLoading(true);
     
     try {
-        const url = `${API_BASE}/ogd_realtime/monitor?rbl=${station.rbl}`;
+        const apiUrl = `${API_BASE}/ogd_realtime/monitor?rbl=${station.rbl}`;
+        const url = `${CORS_PROXY}${encodeURIComponent(apiUrl)}`;
         
         console.log('Fetching:', url);
         
-        const response = await fetch(url, {
-            method: 'GET',
-            mode: 'cors'
-        });
+        const response = await fetch(url);
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
@@ -140,7 +139,7 @@ async function loadDepartures(station) {
         }
     } catch (error) {
         console.error('API Error:', error);
-        showError(`API-Zugriff fehlgeschlagen: ${error.message}. CORS-Einschränkung der Wiener Linien API.`);
+        showError(`Fehler beim Laden der Abfahrten: ${error.message}`);
     } finally {
         showLoading(false);
     }
