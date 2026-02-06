@@ -204,15 +204,23 @@ button:active {
     background: var(--background);
     margin-bottom: 8px;
     border-radius: 6px;
-    cursor: pointer;
     transition: all 0.2s ease;
     border-left: 4px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
 }
 
 .suggestion-item:hover {
     background: var(--border-color);
     border-left-color: var(--primary-color);
     transform: translateX(5px);
+}
+
+.suggestion-info {
+    flex: 1;
+    cursor: pointer;
 }
 
 .suggestion-item strong {
@@ -222,6 +230,121 @@ button:active {
 }
 
 .suggestion-item small {
+    color: var(--text-secondary);
+}
+
+.favorite-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0.3;
+    transition: all 0.2s ease;
+    padding: 5px;
+    line-height: 1;
+}
+
+.favorite-btn:hover {
+    opacity: 0.7;
+    transform: scale(1.2);
+}
+
+.favorite-btn.active {
+    opacity: 1;
+}
+
+/* Recent Searches */
+.recent-searches {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.recent-searches h4 {
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.recent-item {
+    padding: 10px 15px;
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 3px solid var(--border-color);
+}
+
+.recent-item:hover {
+    background: var(--border-color);
+    border-left-color: var(--secondary-color);
+    transform: translateX(3px);
+}
+
+.recent-item strong {
+    display: block;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.recent-item small {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+/* Favorites */
+.favorites-container {
+    padding: 20px;
+}
+
+.favorites-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.favorite-item {
+    padding: 15px 18px;
+    background: var(--background);
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+
+.favorite-item:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .favorite-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.favorite-info {
+    flex: 1;
+    cursor: pointer;
+}
+
+.favorite-info strong {
+    display: block;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    margin-bottom: 3px;
+}
+
+.favorite-info small {
     color: var(--text-secondary);
 }
 
@@ -318,11 +441,34 @@ button:active {
     background: linear-gradient(135deg, var(--primary-color), #ff1744);
     color: white;
     padding: 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.station-header-content {
+    flex: 1;
 }
 
 .station-header h3 {
     font-size: 1.5rem;
     margin-bottom: 5px;
+}
+
+.station-header .favorite-btn {
+    color: white;
+    font-size: 2rem;
+    opacity: 0.5;
+    margin-top: -5px;
+}
+
+.station-header .favorite-btn:hover {
+    opacity: 0.8;
+}
+
+.station-header .favorite-btn.active {
+    opacity: 1;
 }
 
 .station-info {

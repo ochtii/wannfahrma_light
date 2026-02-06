@@ -6,15 +6,27 @@ const CORS_PROXY = 'https://api.allorigins.win/get?url=';
 let map = null;
 let currentMarkers = [];
 let stations = [];
+let favorites = [];
+let recentSearches = [];
+
+// LocalStorage Keys
+const STORAGE_KEYS = {
+    FAVORITES: 'wl_favorites',
+    RECENT: 'wl_recent_searches'
+};
 
 // Initialize App
 document.addEventListener('DOMContentLoaded', async () => {
     await loadStations();
+    loadFavorites();
+    loadRecentSearches();
     initTabs();
     initStationSearch();
     initNearbySearch();
     initMap();
     initThemeToggle();
+    initFavorites();
+    updateRecentSearchesUI();
 });
 
 // Load Stations from JSON
@@ -58,6 +70,135 @@ function initThemeToggle() {
         const isDark = body.classList.contains('dark-mode');
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
     });
+}
+
+// Favorites Management
+function loadFavorites() {
+    try {
+        const stored = localStorage.getItem(STORAGE_KEYS.FAVORITES);
+        favorites = stored ? JSON.parse(stored) : [];
+    } catch (error) {
+        console.error('Error loading favorites:', error);
+        favorites = [];
+    }
+}
+
+function saveFavorites() {
+    try {
+        localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(favorites));
+    } catch (error) {
+        console.error('Error saving favorites:', error);
+    }
+}
+
+function addFavorite(station) {
+    if (!isFavorite(station.rbl)) {
+        favorites.push(station);
+        saveFavorites();
+        updateFavoritesUI();
+    }
+}
+
+function removeFavorite(rbl) {
+    favorites = favorites.filter(f => f.rbl !== rbl);
+    saveFavorites();
+    updateFavoritesUI();
+}
+
+function isFavorite(rbl) {
+    return favorites.some(f => f.rbl === rbl);
+}
+
+function toggleFavorite(station) {
+    if (isFavorite(station.rbl)) {
+        removeFavorite(station.rbl);
+    } else {
+        addFavorite(station);
+    }
+}
+
+function initFavorites() {
+    updateFavoritesUI();
+}
+
+function updateFavoritesUI() {
+    const favoritesList = document.getElementById('favorites-list');
+    
+    if (favorites.length === 0) {
+        favoritesList.innerHTML = `
+            <div class="empty-message">
+                <h3>Keine Favoriten</h3>
+                <p>Fügen Sie Stationen zu Ihren Favoriten hinzu, indem Sie auf den Stern ⭐ klicken.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    favoritesList.innerHTML = favorites.map(station => `
+        <div class="favorite-item">
+            <div class="favorite-info" onclick="loadDepartures(${JSON.stringify(station).replace(/"/g, '&quot;')})">
+                <strong>${station.name}</strong>
+                <small>${station.municipality || ''}</small>
+            </div>
+            <button class="favorite-btn active" onclick="event.stopPropagation(); toggleFavorite(${JSON.stringify(station).replace(/"/g, '&quot;')}); updateFavoritesUI();" title="Aus Favoriten entfernen">
+                ⭐
+            </button>
+        </div>
+    `).join('');
+}
+
+// Recent Searches Management
+function loadRecentSearches() {
+    try {
+        const stored = localStorage.getItem(STORAGE_KEYS.RECENT);
+        recentSearches = stored ? JSON.parse(stored) : [];
+    } catch (error) {
+        console.error('Error loading recent searches:', error);
+        recentSearches = [];
+    }
+}
+
+function saveRecentSearches() {
+    try {
+        localStorage.setItem(STORAGE_KEYS.RECENT, JSON.stringify(recentSearches));
+    } catch (error) {
+        console.error('Error saving recent searches:', error);
+    }
+}
+
+function addRecentSearch(station) {
+    // Remove if already exists
+    recentSearches = recentSearches.filter(s => s.rbl !== station.rbl);
+    
+    // Add to beginning
+    recentSearches.unshift({
+        ...station,
+        timestamp: Date.now()
+    });
+    
+    // Keep only last 5
+    recentSearches = recentSearches.slice(0, 5);
+    
+    saveRecentSearches();
+    updateRecentSearchesUI();
+}
+
+function updateRecentSearchesUI() {
+    const recentSearchesDiv = document.getElementById('recent-searches');
+    const recentList = document.getElementById('recent-list');
+    
+    if (recentSearches.length === 0) {
+        recentSearchesDiv.classList.add('hidden');
+        return;
+    }
+    
+    recentSearchesDiv.classList.remove('hidden');
+    recentList.innerHTML = recentSearches.map(station => `
+        <div class="recent-item" onclick="loadDepartures(${JSON.stringify(station).replace(/"/g, '&quot;')})">
+            <strong>${station.name}</strong>
+            <small>${station.municipality || ''}</small>
+        </div>
+    `).join('');
 }
 
 // Tab Navigation
@@ -133,9 +274,16 @@ function displaySuggestions(stations) {
     }
 
     suggestions.innerHTML = stations.slice(0, 10).map(station => `
-        <div class="suggestion-item" onclick="loadDepartures(${JSON.stringify(station).replace(/"/g, '&quot;')})">
-            <strong>${station.name}</strong>
-            <small>${station.municipality || ''}</small>
+        <div class="suggestion-item">
+            <div class="suggestion-info" onclick="loadDepartures(${JSON.stringify(station).replace(/"/g, '&quot;')})">
+                <strong>${station.name}</strong>
+                <small>${station.municipality || ''}</small>
+            </div>
+            <button class="favorite-btn ${isFavorite(station.rbl) ? 'active' : ''}" 
+                    onclick="event.stopPropagation(); toggleFavorite(${JSON.stringify(station).replace(/"/g, '&quot;')}); displaySuggestions(searchStations(document.getElementById('station-input').value));" 
+                    title="${isFavorite(station.rbl) ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}">
+                ⭐
+            </button>
         </div>
     `).join('');
 }
@@ -143,6 +291,9 @@ function displaySuggestions(stations) {
 // Load Departures - Mit CORS-Proxy
 async function loadDepartures(station) {
     showLoading(true);
+    
+    // Add to recent searches
+    addRecentSearch(station);
     
     try {
         const apiUrl = `${API_BASE}/ogd_realtime/monitor?rbl=${station.rbl}`;
@@ -249,8 +400,15 @@ function displayDepartures(station, monitors) {
     results.innerHTML = `
         <div class="station-card">
             <div class="station-header">
-                <h3>${station.name}</h3>
-                <div class="station-info">${station.municipality || ''}</div>
+                <div class="station-header-content">
+                    <h3>${station.name}</h3>
+                    <div class="station-info">${station.municipality || ''}</div>
+                </div>
+                <button class="favorite-btn ${isFavorite(station.rbl) ? 'active' : ''}" 
+                        onclick="toggleFavorite(${JSON.stringify(station).replace(/"/g, '&quot;')}); this.classList.toggle('active');" 
+                        title="${isFavorite(station.rbl) ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}">
+                    ⭐
+                </button>
             </div>
             <div class="departures-grouped">
                 ${sortedGroups.length > 0 ? sortedGroups.map(group => `
@@ -361,11 +519,18 @@ function displayNearbyStations(stations, userLat, userLon) {
         return `
             <div class="station-card">
                 <div class="station-header">
-                    <h3>${station.name}</h3>
-                    <div class="station-info">
-                        ${Math.round(distance)}m entfernt
-                        ${station.municipality ? ` • ${station.municipality}` : ''}
+                    <div class="station-header-content">
+                        <h3>${station.name}</h3>
+                        <div class="station-info">
+                            ${Math.round(distance)}m entfernt
+                            ${station.municipality ? ` • ${station.municipality}` : ''}
+                        </div>
                     </div>
+                    <button class="favorite-btn ${isFavorite(station.rbl) ? 'active' : ''}" 
+                            onclick="event.stopPropagation(); toggleFavorite(${JSON.stringify(station).replace(/"/g, '&quot;')}); displayNearbyStations(getStations().filter(s => calculateDistance(${userLat}, ${userLon}, s.lat, s.lon) <= ${Math.max(distance + 100, 500)}).sort((a,b) => calculateDistance(${userLat}, ${userLon}, a.lat, a.lon) - calculateDistance(${userLat}, ${userLon}, b.lat, b.lon)), ${userLat}, ${userLon});" 
+                            title="${isFavorite(station.rbl) ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}">
+                        ⭐
+                    </button>
                 </div>
                 <div class="departures" style="padding: 20px; text-align: center;">
                     <button onclick="loadDepartures(${JSON.stringify(station).replace(/"/g, '&quot;')})">

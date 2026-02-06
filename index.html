@@ -22,6 +22,7 @@
         <div class="search-container">
             <div class="search-tabs">
                 <button class="tab-btn active" data-tab="station">Stationssuche</button>
+                <button class="tab-btn" data-tab="favorites">⭐ Favoriten</button>
                 <button class="tab-btn" data-tab="nearby">Umkreissuche</button>
                 <button class="tab-btn" data-tab="map">Karte</button>
             </div>
@@ -33,6 +34,24 @@
                     <button id="search-btn">Suchen</button>
                 </div>
                 <div id="suggestions" class="suggestions"></div>
+                
+                <!-- Letzte Suchen -->
+                <div id="recent-searches" class="recent-searches hidden">
+                    <h4>Letzte Suchen</h4>
+                    <div id="recent-list" class="recent-list"></div>
+                </div>
+            </div>
+
+            <!-- Favoriten Tab -->
+            <div class="tab-content" id="favorites-tab">
+                <div class="favorites-container">
+                    <div id="favorites-list" class="favorites-list">
+                        <div class="empty-message">
+                            <h3>Keine Favoriten</h3>
+                            <p>Fügen Sie Stationen zu Ihren Favoriten hinzu, indem Sie auf den Stern ⭐ klicken.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Umkreissuche Tab -->
