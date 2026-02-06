@@ -5,15 +5,30 @@ const CORS_PROXY = 'https://api.codetabs.com/v1/proxy?quest=';
 // State
 let map = null;
 let currentMarkers = [];
+let stations = [];
 
 // Initialize App
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadStations();
     initTabs();
     initStationSearch();
     initNearbySearch();
     initMap();
     initThemeToggle();
 });
+
+// Load Stations from JSON
+async function loadStations() {
+    try {
+        const response = await fetch('stations.json');
+        if (!response.ok) throw new Error('Failed to load stations');
+        stations = await response.json();
+        console.log(`Loaded ${stations.length} stations`);
+    } catch (error) {
+        console.error('Error loading stations:', error);
+        stations = [];
+    }
+}
 
 // Theme Toggle
 function initThemeToggle() {
@@ -90,7 +105,7 @@ function initStationSearch() {
 
 // Search Stations
 async function searchStations(query) {
-    return getHardcodedStations().filter(s => 
+    return getStations().filter(s => 
         s.name.toLowerCase().includes(query.toLowerCase())
     );
 }
@@ -247,7 +262,7 @@ async function searchNearbyStations(lat, lon, radius) {
     showLoading(true);
     
     try {
-        const stations = getHardcodedStations().filter(station => {
+        const nearbyStations = getStations().filter(station => {
             const distance = calculateDistance(lat, lon, station.lat, station.lon);
             return distance <= radius;
         }).sort((a, b) => {
@@ -256,7 +271,7 @@ async function searchNearbyStations(lat, lon, radius) {
             return distA - distB;
         });
 
-        displayNearbyStations(stations, lat, lon);
+        displayNearbyStations(nearbyStations, lat, lon);
     } catch (error) {
         showError('Fehler bei der Umkreissuche');
     } finally {
@@ -307,7 +322,7 @@ function initMap() {
         maxZoom: 19
     }).addTo(map);
 
-    const stations = getHardcodedStations();
+    const allStations = getStations();
     stations.forEach(station => {
         const marker = L.marker([station.lat, station.lon])
             .bindPopup(`
@@ -398,28 +413,7 @@ function showError(message) {
     `;
 }
 
-// Hardcoded Stations mit RBL IDs
-function getHardcodedStations() {
-    return [
-        { name: 'Stephansplatz', rbl: 4315, lat: 48.2085, lon: 16.3730, municipality: 'Wien 1' },
-        { name: 'Karlsplatz', rbl: 4313, lat: 48.1985, lon: 16.3710, municipality: 'Wien 4' },
-        { name: 'Westbahnhof', rbl: 4316, lat: 48.1970, lon: 16.3385, municipality: 'Wien 15' },
-        { name: 'Praterstern', rbl: 4317, lat: 48.2185, lon: 16.3920, municipality: 'Wien 2' },
-        { name: 'Schwedenplatz', rbl: 4306, lat: 48.2115, lon: 16.3785, municipality: 'Wien 1' },
-        { name: 'Schottentor', rbl: 4318, lat: 48.2155, lon: 16.3610, municipality: 'Wien 1' },
-        { name: 'Volkstheater', rbl: 4305, lat: 48.2055, lon: 16.3565, municipality: 'Wien 7' },
-        { name: 'Landstraße', rbl: 4319, lat: 48.2000, lon: 16.3845, municipality: 'Wien 3' },
-        { name: 'Hauptbahnhof', rbl: 4302, lat: 48.1850, lon: 16.3775, municipality: 'Wien 10' },
-        { name: 'Meidling Hauptstraße', rbl: 4301, lat: 48.1785, lon: 16.3330, municipality: 'Wien 12' },
-        { name: 'Längenfeldgasse', rbl: 4304, lat: 48.1865, lon: 16.3465, municipality: 'Wien 12' },
-        { name: 'Kettenbrückengasse', rbl: 4308, lat: 48.1925, lon: 16.3585, municipality: 'Wien 5' },
-        { name: 'Pilgramgasse', rbl: 4309, lat: 48.1925, lon: 16.3525, municipality: 'Wien 5' },
-        { name: 'Museumsquartier', rbl: 4310, lat: 48.2035, lon: 16.3590, municipality: 'Wien 7' },
-        { name: 'Herrengasse', rbl: 4311, lat: 48.2105, lon: 16.3655, municipality: 'Wien 1' },
-        { name: 'Stubentor', rbl: 4312, lat: 48.2085, lon: 16.3795, municipality: 'Wien 1' },
-        { name: 'Stadtpark', rbl: 4321, lat: 48.2050, lon: 16.3795, municipality: 'Wien 1' },
-        { name: 'Rochusgasse', rbl: 4322, lat: 48.2020, lon: 16.3925, municipality: 'Wien 3' },
-        { name: 'Kardinal-Nagl-Platz', rbl: 4323, lat: 48.2000, lon: 16.3985, municipality: 'Wien 3' },
-        { name: 'Schlachthausgasse', rbl: 4324, lat: 48.1975, lon: 16.4030, municipality: 'Wien 3' }
-    ];
+// Get Stations
+function getStations() {
+    return stations;
 }
