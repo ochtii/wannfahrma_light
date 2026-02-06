@@ -334,6 +334,73 @@ button:active {
     padding: 20px;
 }
 
+.departures-grouped {
+    padding: 20px;
+}
+
+.line-group {
+    background: var(--background);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    padding: 16px;
+    border: 2px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.line-group:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .line-group:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.line-group-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.line-group-info {
+    flex: 1;
+}
+
+.departure-times {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.departure-time-item {
+    flex: 1;
+    min-width: 140px;
+    padding: 10px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.departure-time-item .countdown {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 6px;
+    text-align: center;
+}
+
+.departure-time-item .time-info {
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.8rem;
+}
+
+.departure-time-item .time-info > span {
+    display: block;
+    text-align: center;
+}
+
 .departure-item {
     display: flex;
     align-items: center;
@@ -424,7 +491,8 @@ button:active {
     background: #9C6830; /* U6 Braun */
 }
 
-.departure-info {
+.departure-info,
+.line-group-info {
     flex: 1;
 }
 
@@ -432,6 +500,7 @@ button:active {
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 3px;
+    font-size: 1.05rem;
 }
 
 .countdown {

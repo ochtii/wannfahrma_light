@@ -194,7 +194,8 @@ function displayDepartures(station, monitors) {
         return;
     }
 
-    const departuresList = monitors.flatMap(monitor => 
+    // Collect all departures
+    const allDepartures = monitors.flatMap(monitor => 
         monitor.lines?.flatMap(line => 
             line.departures?.departure?.map(dep => ({
                 line: line.name,
@@ -207,7 +208,36 @@ function displayDepartures(station, monitors) {
                 lineType: determineLineType(line.name, line.type)
             })) || []
         ) || []
-    ).sort((a, b) => (a.countdown || 999) - (b.countdown || 999));
+    );
+
+    // Group by line + towards (important: different destinations!)
+    const grouped = {};
+    allDepartures.forEach(dep => {
+        const key = `${dep.line}|${dep.towards || 'Unbekannt'}`;
+        if (!grouped[key]) {
+            grouped[key] = {
+                line: dep.line,
+                towards: dep.towards,
+                lineType: dep.lineType,
+                platform: dep.platform,
+                departures: []
+            };
+        }
+        grouped[key].departures.push(dep);
+    });
+
+    // Sort departures within each group and take first 3
+    Object.values(grouped).forEach(group => {
+        group.departures.sort((a, b) => (a.countdown || 999) - (b.countdown || 999));
+        group.departures = group.departures.slice(0, 3);
+    });
+
+    // Sort groups by first departure
+    const sortedGroups = Object.values(grouped).sort((a, b) => {
+        const aFirst = a.departures[0]?.countdown || 999;
+        const bFirst = b.departures[0]?.countdown || 999;
+        return aFirst - bFirst;
+    });
 
     results.innerHTML = `
         <div class="station-card">
@@ -215,20 +245,28 @@ function displayDepartures(station, monitors) {
                 <h3>${station.name}</h3>
                 <div class="station-info">${station.municipality || ''}</div>
             </div>
-            <div class="departures">
-                ${departuresList.length > 0 ? departuresList.map(dep => `
-                    <div class="departure-item">
-                        <div class="line-badge ${getLineBadgeClass(dep.line, dep.lineType)}">
-                            <span class="line-icon">${getLineIcon(dep.lineType)}</span>
-                            <span class="line-number">${dep.line}</span>
+            <div class="departures-grouped">
+                ${sortedGroups.length > 0 ? sortedGroups.map(group => `
+                    <div class="line-group">
+                        <div class="line-group-header">
+                            <div class="line-badge ${getLineBadgeClass(group.line, group.lineType)}">
+                                <span class="line-icon">${getLineIcon(group.lineType)}</span>
+                                <span class="line-number">${group.line}</span>
+                            </div>
+                            <div class="line-group-info">
+                                <div class="direction">${group.towards || 'Unbekannt'}</div>
+                                ${group.platform ? `<div class="platform">Steig ${group.platform}</div>` : ''}
+                            </div>
                         </div>
-                        <div class="departure-info">
-                            <div class="direction">${dep.towards || 'Unbekannt'}</div>
-                            ${dep.platform ? `<div class="platform">Steig ${dep.platform}</div>` : ''}
-                            ${formatDepartureTimes(dep.timePlanned, dep.timeReal)}
-                        </div>
-                        <div class="countdown ${dep.timeReal ? 'realtime' : ''}">
-                            ${formatCountdown(dep.countdown)}
+                        <div class="departure-times">
+                            ${group.departures.map(dep => `
+                                <div class="departure-time-item">
+                                    <div class="countdown ${dep.timeReal ? 'realtime' : ''}">
+                                        ${formatCountdown(dep.countdown)}
+                                    </div>
+                                    ${formatDepartureTimes(dep.timePlanned, dep.timeReal)}
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
                 `).join('') : '<div class="empty-message">Keine Abfahrten in den nächsten Minuten</div>'}
