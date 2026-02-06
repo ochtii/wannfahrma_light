@@ -1,6 +1,12 @@
 // Wiener Linien API Configuration
 const API_BASE = 'https://www.wienerlinien.at';
-const CORS_PROXY = 'https://api.allorigins.win/get?url=';
+// Multi-proxy strategy: try direct access first, fallback to proxies
+const CORS_PROXIES = [
+    { url: '', unwrap: false, name: 'Direct' },
+    { url: 'https://corsproxy.io/?', unwrap: false, name: 'corsproxy.io' },
+    { url: 'https://api.allorigins.win/get?url=', unwrap: true, name: 'allorigins.win' }
+];
+let currentProxyIndex = 0;
 
 // State
 let map = null;
@@ -318,37 +324,60 @@ async function loadDepartures(station) {
             console.log(`Loading batch ${Math.floor(i / BATCH_SIZE) + 1}: RBLs ${batch.join(', ')}`);
             
             const batchPromises = batch.map(async (rbl) => {
-                try {
-                    const apiUrl = `${API_BASE}/ogd_realtime/monitor?rbl=${rbl}`;
-                    const url = `${CORS_PROXY}${encodeURIComponent(apiUrl)}`;
-                    
-                    const response = await fetch(url);
-                    
-                    if (!response.ok) {
-                        console.warn(`RBL ${rbl} failed: HTTP ${response.status}`);
-                        return null;
+                // Try current proxy, fallback to next on failure
+                for (let proxyIdx = currentProxyIndex; proxyIdx < CORS_PROXIES.length; proxyIdx++) {
+                    try {
+                        const proxy = CORS_PROXIES[proxyIdx];
+                        const apiUrl = `${API_BASE}/ogd_realtime/monitor?rbl=${rbl}`;
+                        const url = proxy.url ? `${proxy.url}${encodeURIComponent(apiUrl)}` : apiUrl;
+                        
+                        const response = await fetch(url);
+                        
+                        if (!response.ok) {
+                            if (proxyIdx === CORS_PROXIES.length - 1) {
+                                console.warn(`RBL ${rbl} failed on all proxies`);
+                                return null;
+                            }
+                            continue; // Try next proxy
+                        }
+                        
+                        const contentType = response.headers.get('content-type');
+                        if (!contentType || !contentType.includes('application/json')) {
+                            if (proxyIdx === CORS_PROXIES.length - 1) {
+                                console.warn(`RBL ${rbl}: Non-JSON on all proxies`);
+                                return null;
+                            }
+                            continue;
+                        }
+                        
+                        let data;
+                        if (proxy.unwrap) {
+                            const wrapper = await response.json();
+                            if (!wrapper.contents) {
+                                if (proxyIdx === CORS_PROXIES.length - 1) return null;
+                                continue;
+                            }
+                            data = JSON.parse(wrapper.contents);
+                        } else {
+                            data = await response.json();
+                        }
+                        
+                        // Success! Update global proxy if this is not the current one
+                        if (proxyIdx !== currentProxyIndex) {
+                            console.log(`Switched to proxy: ${proxy.name}`);
+                            currentProxyIndex = proxyIdx;
+                        }
+                        
+                        return data.data?.monitors || data.message?.value?.monitors || [];
+                    } catch (error) {
+                        if (proxyIdx === CORS_PROXIES.length - 1) {
+                            console.warn(`RBL ${rbl} error on all proxies:`, error.message);
+                            return null;
+                        }
+                        // Try next proxy
                     }
-                    
-                    const contentType = response.headers.get('content-type');
-                    if (!contentType || !contentType.includes('application/json')) {
-                        console.warn(`RBL ${rbl} failed: Non-JSON response`);
-                        return null;
-                    }
-                    
-                    const wrapper = await response.json();
-                    
-                    if (!wrapper.contents) {
-                        console.warn(`RBL ${rbl} failed: Invalid structure`);
-                        return null;
-                    }
-                    
-                    const data = JSON.parse(wrapper.contents);
-                    
-                    return data.data?.monitors || data.message?.value?.monitors || [];
-                } catch (error) {
-                    console.warn(`RBL ${rbl} error:`, error.message);
-                    return null;
                 }
+                return null;
             });
             
             const batchResults = await Promise.all(batchPromises);
