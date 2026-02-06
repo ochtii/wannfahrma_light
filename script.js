@@ -145,7 +145,7 @@ function updateFavoritesUI() {
     
     favoritesList.innerHTML = favorites.map(station => `
         <div class="favorite-item">
-            <div class="favorite-info" onclick="loadDepartures(${JSON.stringify(station).replace(/"/g, '&quot;')})">
+            <div class="favorite-info" onclick="switchToStationTab('${station.name.replace(/'/g, "\\'")}')">
                 <strong>${station.name}</strong>
                 <small>${station.municipality || ''}</small>
             </div>
@@ -203,14 +203,22 @@ function updateRecentSearchesUI() {
     
     recentSearchesDiv.classList.remove('hidden');
     recentList.innerHTML = recentSearches.map(station => `
-        <div class="recent-item" onclick="loadDepartures(${JSON.stringify(station).replace(/"/g, '&quot;')})">
-            <strong>${station.name}</strong>
-            <small>${station.municipality || ''}</small>
-        </div>
+        <div class="recent-item-compact" onclick="switchToStationTab('${station.name.replace(/'/g, "\\'")}')">${station.name}</div>
     `).join('');
 }
 
 // Tab Navigation
+function switchToStationTab(stationName) {
+    // Switch to station tab without loading
+    document.querySelector('[data-tab="station"]').click();
+    // Pre-fill search with station name
+    const input = document.getElementById('station-input');
+    if (input) {
+        input.value = stationName;
+        input.focus();
+    }
+}
+
 function initTabs() {
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -373,7 +381,7 @@ async function loadDepartures(station, isSilentRefresh = false) {
             
             if (!isSilentRefresh) {
                 console.log(`Loading batch ${currentBatch}: RBLs ${batch.join(', ')}`);
-                updateLoadingStatus(`Batch ${currentBatch}/${totalBatches}: Lade ${batch.length} RBLs...`);
+                updateLoadingStatus(`Batch ${currentBatch}/${totalBatches}: RBL ${batch.join(', ')}...`, currentBatch, totalBatches);
             }
             
             const batchPromises = batch.map(async (rbl) => {
@@ -439,7 +447,7 @@ async function loadDepartures(station, isSilentRefresh = false) {
             // Update progress
             if (!isSilentRefresh) {
                 const loadedCount = allResults.filter(r => r !== null).length;
-                updateLoadingStatus(`Geladen: ${i + batch.length}/${Math.min(rbls.length, 15)} RBLs (${loadedCount} erfolgreich)`);
+                updateLoadingStatus(`${i + batch.length}/${Math.min(rbls.length, 15)} RBLs (${loadedCount} erfolgreich)`, i + batch.length, Math.min(rbls.length, 15));
             }
             
             // Delay between batches (except for last batch)
@@ -938,16 +946,22 @@ function showLoading(show) {
     if (show) {
         loading.classList.remove('hidden');
         results.style.display = 'none';
+        // Reset progress circle
+        updateLoadingStatus('Initialisiere...', 0, 100);
     } else {
         loading.classList.add('hidden');
         results.style.display = 'block';
         // Clear status when hiding
-        updateLoadingStatus('');
+        updateLoadingStatus('', 0, 100);
     }
 }
 
-function updateLoadingStatus(message) {
+function updateLoadingStatus(message, current = 0, total = 100) {
     const statusEl = document.getElementById('loading-status');
+    const progressText = document.getElementById('progress-text');
+    const progressRing = document.getElementById('progress-ring');
+    const loadingMessage = document.getElementById('loading-message');
+    
     if (statusEl) {
         statusEl.textContent = message;
         if (message) {
@@ -955,6 +969,21 @@ function updateLoadingStatus(message) {
         } else {
             statusEl.style.display = 'none';
         }
+    }
+    
+    // Update circular progress
+    if (progressText && progressRing) {
+        const percentage = total > 0 ? Math.round((current / total) * 100) : 0;
+        const circumference = 339.292; // 2 * PI * 54 (radius)
+        const offset = circumference - (percentage / 100) * circumference;
+        
+        progressRing.style.strokeDashoffset = offset;
+        progressText.textContent = `${percentage}%`;
+    }
+    
+    // Update main loading message
+    if (loadingMessage && total > 0 && current > 0) {
+        loadingMessage.textContent = `RBL ${current} von ${total} wird geladen...`;
     }
 }
 
