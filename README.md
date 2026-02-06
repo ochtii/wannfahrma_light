@@ -24,7 +24,12 @@ Die App ist live auf GitHub Pages verfügbar:
 
 Die App nutzt die **öffentliche Wiener Linien OGD API**, die **keinen API-Schlüssel benötigt**. 
 
-**CORS-Proxy:** Da die Wiener Linien API keine direkten Browser-Anfragen von externen Domains erlaubt (CORS-Policy), verwendet die App einen CORS-Proxy (corsproxy.io), um die API-Anfragen zu ermöglichen. Dies ist eine gängige Lösung für client-seitige Web-Apps.
+**⚠️ CORS-Einschränkungen:** Da die Wiener Linien API keine direkten Browser-Anfragen von externen Domains erlaubt (CORS-Policy), zeigt die App aktuell **Demo-Daten** an. Die Demo-Daten basieren auf typischen Linien und Abfahrtszeiten für die wichtigsten Wiener Stationen.
+
+**Für echte Live-Daten gibt es folgende Optionen:**
+- Besuchen Sie direkt [wienerlinien.at](https://www.wienerlinien.at)
+- Hosten Sie einen eigenen CORS-Proxy
+- Erstellen Sie ein Backend, das die API-Aufrufe durchführt
 
 ## 🛠️ Installation und Einrichtung
 

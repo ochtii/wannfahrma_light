@@ -2,7 +2,7 @@
 // Die öffentliche API benötigt keinen API-Schlüssel
 // CORS-Proxy wird benötigt, da die API keine direkten Browser-Anfragen erlaubt
 const API_BASE = 'https://www.wienerlinien.at/ogd_realtime';
-const CORS_PROXY = 'https://corsproxy.io/?';
+const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 
 // State
 let map = null;
@@ -123,39 +123,10 @@ function displaySuggestions(stations) {
 
 // Search Stations via API
 async function searchStations(query) {
-    const apiUrl = `${API_BASE}/monitor?activateTrafficInfo=stoerungkurz`;
-    const url = `${CORS_PROXY}${encodeURIComponent(apiUrl)}`;
-    
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        if (data.message && data.message.value && data.message.value.trafficInfos) {
-            // Filter stations by query
-            const stations = [];
-            data.message.value.trafficInfos.forEach(info => {
-                if (info.name && info.name.toLowerCase().includes(query.toLowerCase())) {
-                    stations.push({
-                        name: info.name,
-                        diva: info.relatedLines?.[0]?.diva,
-                        municipality: info.towards || ''
-                    });
-                }
-            });
-            return stations;
-        }
-        
-        // Fallback: Use predefined stations
-        return getHardcodedStations().filter(s => 
-            s.name.toLowerCase().includes(query.toLowerCase())
-        );
-    } catch (error) {
-        console.error('API Error:', error);
-        // Fallback to hardcoded stations
-        return getHardcodedStations().filter(s => 
-            s.name.toLowerCase().includes(query.toLowerCase())
-        );
-    }
+    // Use hardcoded stations directly (API has CORS issues)
+    return getHardcodedStations().filter(s => 
+        s.name.toLowerCase().includes(query.toLowerCase())
+    );
 }
 
 // Load Departures for a Station
@@ -176,16 +147,23 @@ async function loadDepartures(station) {
         const url = `${CORS_PROXY}${encodeURIComponent(apiUrl)}`;
         
         const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
         const data = await response.json();
         
         if (data.message && data.message.value && data.message.value.monitors) {
             displayDepartures(station, data.message.value.monitors);
         } else {
-            showError('Keine Abfahrtsdaten verfügbar für ' + station.name);
+            // Show demo data when API fails
+            displayDemoDepartures(station);
         }
     } catch (error) {
         console.error('Error loading departures:', error);
-        showError('Fehler beim Laden der Abfahrten. Bitte versuchen Sie es später erneut.');
+        // Show demo data instead of error
+        displayDemoDepartures(station);
     } finally {
         showLoading(false);
     }
@@ -449,6 +427,113 @@ function showError(message) {
 }
 
 // Hardcoded Stations (Fallback and for Map)
+// Display Demo Departures (when API is not available)
+function displayDemoDepartures(station) {
+    const results = document.getElementById('results');
+    
+    // Generate realistic demo departures
+    const lines = getStationLines(station.name);
+    const departures = [];
+    
+    lines.forEach((line, idx) => {
+        const baseTime = 2 + idx * 3;
+        departures.push({
+            line: line.name,
+            towards: line.towards,
+            countdown: baseTime,
+            type: line.type
+        });
+        departures.push({
+            line: line.name,
+            towards: line.towards,
+            countdown: baseTime + 8,
+            type: line.type
+        });
+    });
+    
+    results.innerHTML = `
+        <div class="station-card">
+            <div class="station-header">
+                <h3>${station.name}</h3>
+                <div class="station-info">${station.municipality || ''}</div>
+                <div class="station-info" style="margin-top: 10px; font-size: 0.9rem; opacity: 0.9;">
+                    ⚠️ Demo-Daten (API nicht verfügbar - CORS-Einschränkungen)
+                </div>
+            </div>
+            <div class="departures">
+                ${departures.sort((a, b) => a.countdown - b.countdown).map(dep => `
+                    <div class="departure-item">
+                        <div class="line-badge ${getLineClass(dep.type)}">
+                            ${dep.line}
+                        </div>
+                        <div class="departure-info">
+                            <div class="direction">${dep.towards}</div>
+                        </div>
+                        <div class="countdown">
+                            ${formatCountdown(dep.countdown)}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            <div style="padding: 15px; text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
+                💡 Tipp: Für echte Live-Daten besuchen Sie <a href="https://www.wienerlinien.at" target="_blank">wienerlinien.at</a>
+            </div>
+        </div>
+    `;
+}
+
+// Get typical lines for a station
+function getStationLines(stationName) {
+    const linesByStation = {
+        'Stephansplatz': [
+            { name: 'U1', towards: 'Leopoldau', type: 'u-bahn' },
+            { name: 'U3', towards: 'Ottakring', type: 'u-bahn' }
+        ],
+        'Karlsplatz': [
+            { name: 'U1', towards: 'Oberlaa', type: 'u-bahn' },
+            { name: 'U2', towards: 'Seestadt', type: 'u-bahn' },
+            { name: 'U4', towards: 'Hütteldorf', type: 'u-bahn' }
+        ],
+        'Westbahnhof': [
+            { name: 'U3', towards: 'Simmering', type: 'u-bahn' },
+            { name: 'U6', towards: 'Siebenhirten', type: 'u-bahn' }
+        ],
+        'Praterstern': [
+            { name: 'U1', towards: 'Oberlaa', type: 'u-bahn' },
+            { name: 'U2', towards: 'Karlsplatz', type: 'u-bahn' }
+        ],
+        'Schwedenplatz': [
+            { name: 'U1', towards: 'Leopoldau', type: 'u-bahn' },
+            { name: 'U4', towards: 'Heiligenstadt', type: 'u-bahn' }
+        ],
+        'Schottentor': [
+            { name: 'U2', towards: 'Seestadt', type: 'u-bahn' },
+            { name: '1', towards: 'Prater', type: 'tram' }
+        ],
+        'Hauptbahnhof': [
+            { name: 'U1', towards: 'Leopoldau', type: 'u-bahn' },
+            { name: 'D', towards: 'Nußdorf', type: 'tram' }
+        ],
+        'Volkstheater': [
+            { name: 'U3', towards: 'Simmering', type: 'u-bahn' },
+            { name: '49', towards: 'Hütteldorf', type: 'tram' }
+        ],
+        'Landstraße': [
+            { name: 'U3', towards: 'Ottakring', type: 'u-bahn' },
+            { name: 'U4', towards: 'Hütteldorf', type: 'u-bahn' }
+        ],
+        'Meidling Hauptstraße': [
+            { name: 'U4', towards: 'Heiligenstadt', type: 'u-bahn' },
+            { name: '62', towards: 'Lainz', type: 'tram' }
+        ]
+    };
+    
+    return linesByStation[stationName] || [
+        { name: 'U3', towards: 'Ottakring', type: 'u-bahn' },
+        { name: '43', towards: 'Neuwaldegg', type: 'bus' }
+    ];
+}
+
 function getHardcodedStations() {
     return [
         { name: 'Stephansplatz', rbl: 4315, lat: 48.2085, lon: 16.3730, municipality: 'Wien 1' },
