@@ -1,6 +1,8 @@
 // Wiener Linien API Configuration
 // Die öffentliche API benötigt keinen API-Schlüssel
+// CORS-Proxy wird benötigt, da die API keine direkten Browser-Anfragen erlaubt
 const API_BASE = 'https://www.wienerlinien.at/ogd_realtime';
+const CORS_PROXY = 'https://corsproxy.io/?';
 
 // State
 let map = null;
@@ -121,7 +123,8 @@ function displaySuggestions(stations) {
 
 // Search Stations via API
 async function searchStations(query) {
-    const url = `${API_BASE}/monitor?activateTrafficInfo=stoerungkurz`;
+    const apiUrl = `${API_BASE}/monitor?activateTrafficInfo=stoerungkurz`;
+    const url = `${CORS_PROXY}${encodeURIComponent(apiUrl)}`;
     
     try {
         const response = await fetch(url);
@@ -161,13 +164,16 @@ async function loadDepartures(station) {
     
     try {
         // Use RBL if available, otherwise try with station name
-        let url = `${API_BASE}/monitor`;
+        let params = [];
         
         if (station.rbl) {
-            url += `&rbl=${station.rbl}`;
+            params.push(`rbl=${station.rbl}`);
         } else if (station.diva) {
-            url += `&diva=${station.diva}`;
+            params.push(`diva=${station.diva}`);
         }
+        
+        const apiUrl = `${API_BASE}/monitor?${params.join('&')}`;
+        const url = `${CORS_PROXY}${encodeURIComponent(apiUrl)}`;
         
         const response = await fetch(url);
         const data = await response.json();
