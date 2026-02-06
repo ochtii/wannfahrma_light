@@ -32,8 +32,9 @@ async function loadStations() {
                 municipality: s.municipality,
                 lat: s.latitude,
                 lon: s.longitude,
-                rbl: parseInt(s.rbls[0]) // Use first RBL
-            }));
+                rbl: Math.floor(parseFloat(s.rbls[0])) // Convert "2093.0" to 2093
+            }))
+            .filter(s => !isNaN(s.rbl) && s.rbl > 0); // Remove invalid RBLs
         
         console.log(`Loaded ${stations.length} stations from ${data.stations.length} total`);
     } catch (error) {
@@ -153,6 +154,13 @@ async function loadDepartures(station) {
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Non-JSON response:', text.substring(0, 200));
+            throw new Error('Proxy-Fehler: Keine JSON-Antwort erhalten');
         }
         
         const data = await response.json();
