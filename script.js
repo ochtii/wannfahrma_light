@@ -1,10 +1,10 @@
 // Wiener Linien API Configuration
 const API_BASE = 'https://www.wienerlinien.at';
-// Multi-proxy strategy: try direct access first, fallback to proxies
+// Multi-proxy strategy: Start with most reliable proxies
 const CORS_PROXIES = [
-    { url: '', unwrap: false, name: 'Direct' },
+    { url: 'https://api.allorigins.win/get?url=', unwrap: true, name: 'allorigins.win' },
     { url: 'https://corsproxy.io/?', unwrap: false, name: 'corsproxy.io' },
-    { url: 'https://api.allorigins.win/get?url=', unwrap: true, name: 'allorigins.win' }
+    { url: '', unwrap: false, name: 'Direct' }
 ];
 let currentProxyIndex = 0;
 
@@ -313,9 +313,9 @@ async function loadDepartures(station) {
         console.log(`Loading departures for ${fullStation.name} from ${rbls.length} RBL(s): ${rbls.join(', ')}`);
         
         // Batch loading to avoid overwhelming the CORS proxy
-        // Load RBLs in batches of 3 with delay between batches
-        const BATCH_SIZE = 3;
-        const BATCH_DELAY = 500; // ms between batches
+        // Load RBLs in batches of 2 with delay between batches
+        const BATCH_SIZE = 2;
+        const BATCH_DELAY = 1500; // ms between batches
         
         const allResults = [];
         
