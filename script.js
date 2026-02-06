@@ -293,17 +293,21 @@ function displaySuggestions(stations) {
 async function loadDepartures(station) {
     showLoading(true);
     
-    // Add to recent searches
-    addRecentSearch(station);
+    // Ensure we have the latest station data with all RBLs
+    // This fixes issues with old favorites/recent searches that don't have rbls array
+    const fullStation = stations.find(s => s.rbl === station.rbl) || station;
+    
+    // Add to recent searches with full data
+    addRecentSearch(fullStation);
     
     try {
         // Use all RBLs for the station (fallback to single rbl for backwards compatibility)
-        const rbls = station.rbls || [station.rbl];
+        const rbls = fullStation.rbls || [fullStation.rbl];
         
-        console.log(`Loading departures for ${station.name} from ${rbls.length} RBL(s)`);
+        console.log(`Loading departures for ${fullStation.name} from ${rbls.length} RBL(s): ${rbls.join(', ')}`);
         
-        // Fetch data for all RBLs in parallel
-        const fetchPromises = rbls.slice(0, 10).map(async (rbl) => {
+        // Fetch data for all RBLs in parallel (limit to 15 to avoid too many requests)
+        const fetchPromises = rbls.slice(0, 15).map(async (rbl) => {
             try {
                 const apiUrl = `${API_BASE}/ogd_realtime/monitor?rbl=${rbl}`;
                 const url = `${CORS_PROXY}${encodeURIComponent(apiUrl)}`;
@@ -345,7 +349,7 @@ async function loadDepartures(station) {
             .flat();
         
         if (allMonitors.length > 0) {
-            displayDepartures(station, allMonitors);
+            displayDepartures(fullStation, allMonitors);
         } else {
             showError('Keine Abfahrtsdaten verfügbar');
         }
