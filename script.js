@@ -426,27 +426,69 @@ function displayDepartures(station, monitors) {
     // Collect all departures
     const allDepartures = monitors.flatMap(monitor => 
         monitor.lines?.flatMap(line => 
-            line.departures?.departure?.map(dep => ({
-                line: line.name,
-                towards: line.towards,
-                platform: line.platform,
-                countdown: dep.departureTime?.countdown,
-                timeReal: dep.departureTime?.timeReal,
-                timePlanned: dep.departureTime?.timePlanned,
-                type: line.type,
-                lineType: determineLineType(line.name, line.type)
-            })) || []
+            line.departures?.departure?.map(dep => {
+                // Try to get the most specific destination
+                // API structure: dep.vehicle?.towards or dep.vehicle?.direction or line.towards
+                const finalDestination = dep.vehicle?.towards || 
+                                       dep.vehicle?.direction?.value || 
+                                       dep.vehicle?.destination || 
+                                       line.towards;
+                
+                return {
+                    line: line.name,
+                    towards: line.towards,
+                    destination: finalDestination,
+                    platform: line.platform,
+                    countdown: dep.departureTime?.countdown,
+                    timeReal: dep.departureTime?.timeReal,
+                    timePlanned: dep.departureTime?.timePlanned,
+                    type: line.type,
+                    lineType: determineLineType(line.name, line.type),
+                    _raw: dep // Keep raw data for debugging
+                };
+            }) || []
         ) || []
     );
+    
+    // Debug: Log first departure to see API structure
+    if (allDepartures.length > 0) {
+        console.log('Sample departure data:', allDepartures[0]);
+    }
 
-    // Group by line + towards (important: different destinations!)
-    const grouped = {};
+    // Remove duplicates: prefer entries with timeReal
+    const deduped = [];
+    const seenKeys = new Set();
+    
+    // Sort: entries with timeReal first
+    allDepartures.sort((a, b) => {
+        if (a.timeReal && !b.timeReal) return -1;
+        if (!a.timeReal && b.timeReal) return 1;
+        return (a.countdown || 999) - (b.countdown || 999);
+    });
+    
     allDepartures.forEach(dep => {
-        const key = `${dep.line}|${dep.towards || 'Unbekannt'}`;
+        // Create unique key from line, destination, and countdown
+        // Round countdown to avoid duplicates with slight time differences
+        const roundedCountdown = Math.floor((dep.countdown || 0) / 1) * 1; // 1 minute tolerance
+        const key = `${dep.line}|${dep.destination}|${roundedCountdown}`;
+        
+        if (!seenKeys.has(key)) {
+            seenKeys.add(key);
+            deduped.push(dep);
+        } else {
+            // Duplicate found - only happens when live and planned data exist for same departure
+            console.log(`Removed duplicate: ${dep.line} → ${dep.destination} in ${dep.countdown}min (${dep.timeReal ? 'had live data' : 'was planned only'})`);
+        }
+    });
+
+    // Group by line + destination (not just towards)
+    const grouped = {};
+    deduped.forEach(dep => {
+        const key = `${dep.line}|${dep.destination || dep.towards || 'Unbekannt'}`;
         if (!grouped[key]) {
             grouped[key] = {
                 line: dep.line,
-                towards: dep.towards,
+                destination: dep.destination || dep.towards,
                 lineType: dep.lineType,
                 platform: dep.platform,
                 departures: []
@@ -490,7 +532,7 @@ function displayDepartures(station, monitors) {
                                 <span class="line-number">${group.line}</span>
                             </div>
                             <div class="line-group-info">
-                                <div class="direction">${group.towards || 'Unbekannt'}</div>
+                                <div class="direction">${group.destination || 'Unbekannt'}</div>
                                 ${group.platform ? `<div class="platform">Steig ${group.platform}</div>` : ''}
                             </div>
                         </div>
