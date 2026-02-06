@@ -427,6 +427,15 @@ function displayDepartures(station, monitors) {
     const allDepartures = monitors.flatMap(monitor => 
         monitor.lines?.flatMap(line => 
             line.departures?.departure?.map(dep => {
+                // Log raw API structure to find destination field
+                if (line.name === 'U1' && !window._u1Logged) {
+                    console.log('U1 Raw API data:', JSON.stringify({
+                        line: line,
+                        departure: dep
+                    }, null, 2));
+                    window._u1Logged = true;
+                }
+                
                 // Try to get the most specific destination
                 // API structure: dep.vehicle?.towards or dep.vehicle?.direction or line.towards
                 const finalDestination = dep.vehicle?.towards || 
@@ -451,8 +460,9 @@ function displayDepartures(station, monitors) {
     );
     
     // Debug: Log first departure to see API structure
-    if (allDepartures.length > 0) {
+    if (allDepartures.length > 0 && !window._sampleLogged) {
         console.log('Sample departure data:', allDepartures[0]);
+        window._sampleLogged = true;
     }
 
     // Remove duplicates: prefer entries with timeReal
