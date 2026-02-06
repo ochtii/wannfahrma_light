@@ -1,6 +1,6 @@
 // Wiener Linien API Configuration
 const API_BASE = 'https://www.wienerlinien.at';
-const CORS_PROXY = 'https://api.codetabs.com/v1/proxy?quest=';
+const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 
 // State
 let map = null;
