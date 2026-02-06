@@ -574,19 +574,36 @@ function initMap() {
         maxZoom: 19
     }).addTo(map);
 
+    // Create marker cluster group
+    const markers = L.markerClusterGroup({
+        chunkedLoading: true,
+        chunkInterval: 200,
+        chunkDelay: 50,
+        showCoverageOnHover: false,
+        maxClusterRadius: 50,
+        spiderfyOnMaxZoom: true,
+        removeOutsideVisibleBounds: true
+    });
+
     const allStations = getStations();
-    stations.forEach(station => {
+    
+    // Add markers to cluster group
+    allStations.forEach(station => {
         const marker = L.marker([station.lat, station.lon])
             .bindPopup(`
-                <div class="popup-station">${station.name}</div>
-                <small>${station.municipality || ''}</small><br>
-                <button class="popup-btn" onclick="loadDepartures(${JSON.stringify(station).replace(/"/g, '&quot;')})">
-                    Abfahrten anzeigen
-                </button>
-            `)
-            .addTo(map);
-        currentMarkers.push(marker);
+                <div class="popup-station">
+                    <strong>${station.name}</strong><br>
+                    <small>${station.municipality || ''}</small><br>
+                    <button class="popup-btn" onclick="loadDepartures(${JSON.stringify(station).replace(/"/g, '&quot;')})">
+                        Abfahrten anzeigen
+                    </button>
+                </div>
+            `);
+        markers.addLayer(marker);
     });
+
+    // Add cluster group to map
+    map.addLayer(markers);
 
     map.on('click', async (e) => {
         const { lat, lng } = e.latlng;

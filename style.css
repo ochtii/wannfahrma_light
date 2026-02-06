@@ -865,3 +865,34 @@ footer a:hover {
 .popup-btn:hover {
     background: #c00511;
 }
+
+/* Marker Cluster Styling */
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+    background-color: rgba(226, 6, 19, 0.6);
+}
+
+.marker-cluster-small div,
+.marker-cluster-medium div,
+.marker-cluster-large div {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: bold;
+}
+
+.dark-mode .marker-cluster-small,
+.dark-mode .marker-cluster-medium,
+.dark-mode .marker-cluster-large {
+    background-color: rgba(226, 6, 19, 0.4);
+}
+
+.popup-station {
+    font-size: 1.1rem;
+    line-height: 1.4;
+}
+
+.popup-station strong {
+    display: block;
+    margin-bottom: 4px;
+}
