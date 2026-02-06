@@ -22,14 +22,11 @@ Die App ist live auf GitHub Pages verfügbar:
 
 ## � API-Information
 
-Die App nutzt die **öffentliche Wiener Linien OGD API**, die **keinen API-Schlüssel benötigt**. 
+Die App nutzt die **öffentliche Wiener Linien OGD API** ohne API-Schlüssel.
 
-**⚠️ CORS-Einschränkungen:** Da die Wiener Linien API keine direkten Browser-Anfragen von externen Domains erlaubt (CORS-Policy), zeigt die App aktuell **Demo-Daten** an. Die Demo-Daten basieren auf typischen Linien und Abfahrtszeiten für die wichtigsten Wiener Stationen.
+**⚠️ CORS-Einschränkung:** Die Wiener Linien API erlaubt keine direkten Browser-Anfragen von externen Domains (CORS-Policy). Die API funktioniert nur in nativen Apps (wie Android/iOS), nicht in Web-Apps die auf GitHub Pages gehostet sind.
 
-**Für echte Live-Daten gibt es folgende Optionen:**
-- Besuchen Sie direkt [wienerlinien.at](https://www.wienerlinien.at)
-- Hosten Sie einen eigenen CORS-Proxy
-- Erstellen Sie ein Backend, das die API-Aufrufe durchführt
+**Lösung:** Um Live-Daten zu erhalten, müssten Sie die App lokal ausführen mit deaktivierter CORS-Policy oder ein Backend erstellen.
 
 ## 🛠️ Installation und Einrichtung
 
@@ -147,9 +144,19 @@ MIT License - Siehe [LICENSE](LICENSE) für Details
 
 ## 🐛 Bekannte Probleme
 
-- Einige kleinere Stationen könnten nicht in den Fallback-Daten enthalten sein
+- **CORS-Blockierung:** Die Wiener Linien API blockiert Browser-Anfragen von GitHub Pages
+- Einige kleinere Stationen könnten nicht in den Stationsdaten enthalten sein
 - Echtzeitdaten können bei Störungen ungenau sein
-- API-Rate-Limits können bei sehr häufigen Anfragen greifen
+
+**Workaround für lokale Entwicklung:**
+```bash
+# Chrome mit deaktivierter CORS-Policy starten (nur für Entwicklung!)
+# macOS/Linux:
+open -na "Google Chrome" --args --disable-web-security --user-data-dir=/tmp/chrome_dev
+
+# Windows:
+chrome.exe --disable-web-security --user-data-dir=C:\temp\chrome_dev
+```
 
 ## 📞 Kontakt
 

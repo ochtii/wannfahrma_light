@@ -1,13 +1,9 @@
 // Wiener Linien API Configuration
-// Die öffentliche API benötigt keinen API-Schlüssel
-// CORS-Proxy wird benötigt, da die API keine direkten Browser-Anfragen erlaubt
-const API_BASE = 'https://www.wienerlinien.at/ogd_realtime';
-const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+const API_BASE = 'https://www.wienerlinien.at';
 
 // State
 let map = null;
 let currentMarkers = [];
-let allStations = [];
 
 // Initialize App
 document.addEventListener('DOMContentLoaded', () => {
@@ -23,7 +19,6 @@ function initThemeToggle() {
     const themeToggle = document.getElementById('theme-toggle');
     const body = document.body;
     
-    // Load saved theme preference or use dark mode as default
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'light') {
         body.classList.remove('dark-mode');
@@ -45,14 +40,12 @@ function initTabs() {
         btn.addEventListener('click', () => {
             const tabName = btn.dataset.tab;
 
-            // Update active states
             tabBtns.forEach(b => b.classList.remove('active'));
             tabContents.forEach(c => c.classList.remove('active'));
 
             btn.classList.add('active');
             document.getElementById(`${tabName}-tab`).classList.add('active');
 
-            // Initialize map when tab is opened
             if (tabName === 'map' && map) {
                 setTimeout(() => map.invalidateSize(), 100);
             }
@@ -66,7 +59,6 @@ function initStationSearch() {
     const searchBtn = document.getElementById('search-btn');
     const suggestions = document.getElementById('suggestions');
 
-    // Load stations on input
     input.addEventListener('input', debounce(async (e) => {
         const query = e.target.value.trim();
         if (query.length < 2) {
@@ -74,15 +66,10 @@ function initStationSearch() {
             return;
         }
 
-        try {
-            const stations = await searchStations(query);
-            displaySuggestions(stations);
-        } catch (error) {
-            console.error('Fehler beim Laden der Stationen:', error);
-        }
+        const stations = await searchStations(query);
+        displaySuggestions(stations);
     }, 300));
 
-    // Search on Enter
     input.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             searchBtn.click();
@@ -93,15 +80,18 @@ function initStationSearch() {
         const query = input.value.trim();
         if (query.length < 2) return;
 
-        try {
-            const stations = await searchStations(query);
-            if (stations.length > 0) {
-                loadDepartures(stations[0]);
-            }
-        } catch (error) {
-            showError('Fehler beim Laden der Abfahrten');
+        const stations = await searchStations(query);
+        if (stations.length > 0) {
+            loadDepartures(stations[0]);
         }
     });
+}
+
+// Search Stations
+async function searchStations(query) {
+    return getHardcodedStations().filter(s => 
+        s.name.toLowerCase().includes(query.toLowerCase())
+    );
 }
 
 // Display Station Suggestions
@@ -121,32 +111,19 @@ function displaySuggestions(stations) {
     `).join('');
 }
 
-// Search Stations via API
-async function searchStations(query) {
-    // Use hardcoded stations directly (API has CORS issues)
-    return getHardcodedStations().filter(s => 
-        s.name.toLowerCase().includes(query.toLowerCase())
-    );
-}
-
-// Load Departures for a Station
+// Load Departures - Direkter API-Call
 async function loadDepartures(station) {
     showLoading(true);
     
     try {
-        // Use RBL if available, otherwise try with station name
-        let params = [];
+        const url = `${API_BASE}/ogd_realtime/monitor?rbl=${station.rbl}`;
         
-        if (station.rbl) {
-            params.push(`rbl=${station.rbl}`);
-        } else if (station.diva) {
-            params.push(`diva=${station.diva}`);
-        }
+        console.log('Fetching:', url);
         
-        const apiUrl = `${API_BASE}/monitor?${params.join('&')}`;
-        const url = `${CORS_PROXY}${encodeURIComponent(apiUrl)}`;
-        
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors'
+        });
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
@@ -154,16 +131,16 @@ async function loadDepartures(station) {
         
         const data = await response.json();
         
-        if (data.message && data.message.value && data.message.value.monitors) {
+        if (data.data && data.data.monitors) {
+            displayDepartures(station, data.data.monitors);
+        } else if (data.message && data.message.value && data.message.value.monitors) {
             displayDepartures(station, data.message.value.monitors);
         } else {
-            // Show demo data when API fails
-            displayDemoDepartures(station);
+            showError('Keine Abfahrtsdaten verfügbar');
         }
     } catch (error) {
-        console.error('Error loading departures:', error);
-        // Show demo data instead of error
-        displayDemoDepartures(station);
+        console.error('API Error:', error);
+        showError(`API-Zugriff fehlgeschlagen: ${error.message}. CORS-Einschränkung der Wiener Linien API.`);
     } finally {
         showLoading(false);
     }
@@ -322,7 +299,6 @@ function displayNearbyStations(stations, userLat, userLon) {
 function initMap() {
     if (map) return;
 
-    // Vienna center
     const vienna = [48.2082, 16.3738];
     
     map = L.map('map').setView(vienna, 13);
@@ -332,7 +308,6 @@ function initMap() {
         maxZoom: 19
     }).addTo(map);
 
-    // Add station markers
     const stations = getHardcodedStations();
     stations.forEach(station => {
         const marker = L.marker([station.lat, station.lon])
@@ -347,7 +322,6 @@ function initMap() {
         currentMarkers.push(marker);
     });
 
-    // Click on map to search nearby
     map.on('click', async (e) => {
         const { lat, lng } = e.latlng;
         document.getElementById('lat-input').value = lat.toFixed(6);
@@ -355,7 +329,6 @@ function initMap() {
         
         await searchNearbyStations(lat, lng, 500);
         
-        // Switch to results
         document.querySelector('[data-tab="station"]').click();
     });
 }
@@ -377,7 +350,7 @@ function formatCountdown(minutes) {
 }
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371e3; // Earth radius in meters
+    const R = 6371e3;
     const φ1 = lat1 * Math.PI / 180;
     const φ2 = lat2 * Math.PI / 180;
     const Δφ = (lat2 - lat1) * Math.PI / 180;
@@ -426,114 +399,7 @@ function showError(message) {
     `;
 }
 
-// Hardcoded Stations (Fallback and for Map)
-// Display Demo Departures (when API is not available)
-function displayDemoDepartures(station) {
-    const results = document.getElementById('results');
-    
-    // Generate realistic demo departures
-    const lines = getStationLines(station.name);
-    const departures = [];
-    
-    lines.forEach((line, idx) => {
-        const baseTime = 2 + idx * 3;
-        departures.push({
-            line: line.name,
-            towards: line.towards,
-            countdown: baseTime,
-            type: line.type
-        });
-        departures.push({
-            line: line.name,
-            towards: line.towards,
-            countdown: baseTime + 8,
-            type: line.type
-        });
-    });
-    
-    results.innerHTML = `
-        <div class="station-card">
-            <div class="station-header">
-                <h3>${station.name}</h3>
-                <div class="station-info">${station.municipality || ''}</div>
-                <div class="station-info" style="margin-top: 10px; font-size: 0.9rem; opacity: 0.9;">
-                    ⚠️ Demo-Daten (API nicht verfügbar - CORS-Einschränkungen)
-                </div>
-            </div>
-            <div class="departures">
-                ${departures.sort((a, b) => a.countdown - b.countdown).map(dep => `
-                    <div class="departure-item">
-                        <div class="line-badge ${getLineClass(dep.type)}">
-                            ${dep.line}
-                        </div>
-                        <div class="departure-info">
-                            <div class="direction">${dep.towards}</div>
-                        </div>
-                        <div class="countdown">
-                            ${formatCountdown(dep.countdown)}
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-            <div style="padding: 15px; text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
-                💡 Tipp: Für echte Live-Daten besuchen Sie <a href="https://www.wienerlinien.at" target="_blank">wienerlinien.at</a>
-            </div>
-        </div>
-    `;
-}
-
-// Get typical lines for a station
-function getStationLines(stationName) {
-    const linesByStation = {
-        'Stephansplatz': [
-            { name: 'U1', towards: 'Leopoldau', type: 'u-bahn' },
-            { name: 'U3', towards: 'Ottakring', type: 'u-bahn' }
-        ],
-        'Karlsplatz': [
-            { name: 'U1', towards: 'Oberlaa', type: 'u-bahn' },
-            { name: 'U2', towards: 'Seestadt', type: 'u-bahn' },
-            { name: 'U4', towards: 'Hütteldorf', type: 'u-bahn' }
-        ],
-        'Westbahnhof': [
-            { name: 'U3', towards: 'Simmering', type: 'u-bahn' },
-            { name: 'U6', towards: 'Siebenhirten', type: 'u-bahn' }
-        ],
-        'Praterstern': [
-            { name: 'U1', towards: 'Oberlaa', type: 'u-bahn' },
-            { name: 'U2', towards: 'Karlsplatz', type: 'u-bahn' }
-        ],
-        'Schwedenplatz': [
-            { name: 'U1', towards: 'Leopoldau', type: 'u-bahn' },
-            { name: 'U4', towards: 'Heiligenstadt', type: 'u-bahn' }
-        ],
-        'Schottentor': [
-            { name: 'U2', towards: 'Seestadt', type: 'u-bahn' },
-            { name: '1', towards: 'Prater', type: 'tram' }
-        ],
-        'Hauptbahnhof': [
-            { name: 'U1', towards: 'Leopoldau', type: 'u-bahn' },
-            { name: 'D', towards: 'Nußdorf', type: 'tram' }
-        ],
-        'Volkstheater': [
-            { name: 'U3', towards: 'Simmering', type: 'u-bahn' },
-            { name: '49', towards: 'Hütteldorf', type: 'tram' }
-        ],
-        'Landstraße': [
-            { name: 'U3', towards: 'Ottakring', type: 'u-bahn' },
-            { name: 'U4', towards: 'Hütteldorf', type: 'u-bahn' }
-        ],
-        'Meidling Hauptstraße': [
-            { name: 'U4', towards: 'Heiligenstadt', type: 'u-bahn' },
-            { name: '62', towards: 'Lainz', type: 'tram' }
-        ]
-    };
-    
-    return linesByStation[stationName] || [
-        { name: 'U3', towards: 'Ottakring', type: 'u-bahn' },
-        { name: '43', towards: 'Neuwaldegg', type: 'bus' }
-    ];
-}
-
+// Hardcoded Stations mit RBL IDs
 function getHardcodedStations() {
     return [
         { name: 'Stephansplatz', rbl: 4315, lat: 48.2085, lon: 16.3730, municipality: 'Wien 1' },
