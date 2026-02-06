@@ -214,10 +214,14 @@ function updateRecentSearchesUI() {
 function initTabs() {
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
+    let previousTab = 'station';
 
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const tabName = btn.dataset.tab;
+            
+            // Skip if clicking already active tab
+            if (tabName === previousTab) return;
 
             tabBtns.forEach(b => b.classList.remove('active'));
             tabContents.forEach(c => c.classList.remove('active'));
@@ -225,19 +229,25 @@ function initTabs() {
             btn.classList.add('active');
             document.getElementById(`${tabName}-tab`).classList.add('active');
 
-            // Stop auto-refresh when switching tabs
-            stopAutoRefresh();
-            
-            // Clear results when switching away from station tab
-            if (tabName !== 'station') {
+            // When LEAVING station tab
+            if (previousTab === 'station' && tabName !== 'station') {
+                stopAutoRefresh();
                 const results = document.getElementById('results');
                 if (results) results.innerHTML = '';
-                currentStation = null;
+                // Keep currentStation so we can reload when returning
+            }
+            
+            // When RETURNING to station tab with existing station
+            if (tabName === 'station' && currentStation && previousTab !== 'station') {
+                // Reload the station to restart auto-refresh
+                setTimeout(() => loadDepartures(currentStation), 100);
             }
 
             if (tabName === 'map' && map) {
                 setTimeout(() => map.invalidateSize(), 100);
             }
+            
+            previousTab = tabName;
         });
     });
 }
@@ -334,6 +344,7 @@ function displaySuggestions(stations) {
 async function loadDepartures(station, isSilentRefresh = false) {
     if (!isSilentRefresh) {
         showLoading(true);
+        updateLoadingStatus('Initialisiere...');
         stopAutoRefresh(); // Stop old refresh
         currentStation = station; // Update current station
     }
@@ -351,7 +362,10 @@ async function loadDepartures(station, isSilentRefresh = false) {
         // Use all RBLs for the station (fallback to single rbl for backwards compatibility)
         const rbls = fullStation.rbls || [fullStation.rbl];
         
-        console.log(`Loading departures for ${fullStation.name} from ${rbls.length} RBL(s): ${rbls.join(', ')}`);
+        if (!isSilentRefresh) {
+            console.log(`Loading departures for ${fullStation.name} from ${rbls.length} RBL(s): ${rbls.join(', ')}`);
+            updateLoadingStatus(`Lade ${rbls.length} Haltestellen...`);
+        }
         
         // Batch loading to avoid overwhelming the CORS proxy
         // Load RBLs in batches of 5 with delay between batches
@@ -359,10 +373,16 @@ async function loadDepartures(station, isSilentRefresh = false) {
         const BATCH_DELAY = 300; // ms between batches
         
         const allResults = [];
+        const totalBatches = Math.ceil(Math.min(rbls.length, 15) / BATCH_SIZE);
         
         for (let i = 0; i < Math.min(rbls.length, 15); i += BATCH_SIZE) {
             const batch = rbls.slice(i, i + BATCH_SIZE);
-            console.log(`Loading batch ${Math.floor(i / BATCH_SIZE) + 1}: RBLs ${batch.join(', ')}`);
+            const currentBatch = Math.floor(i / BATCH_SIZE) + 1;
+            
+            if (!isSilentRefresh) {
+                console.log(`Loading batch ${currentBatch}: RBLs ${batch.join(', ')}`);
+                updateLoadingStatus(`Batch ${currentBatch}/${totalBatches}: Lade ${batch.length} RBLs...`);
+            }
             
             const batchPromises = batch.map(async (rbl) => {
                 // Try current proxy, fallback to next on failure
@@ -424,6 +444,12 @@ async function loadDepartures(station, isSilentRefresh = false) {
             const batchResults = await Promise.all(batchPromises);
             allResults.push(...batchResults);
             
+            // Update progress
+            if (!isSilentRefresh) {
+                const loadedCount = allResults.filter(r => r !== null).length;
+                updateLoadingStatus(`Geladen: ${i + batch.length}/${Math.min(rbls.length, 15)} RBLs (${loadedCount} erfolgreich)`);
+            }
+            
             // Delay between batches (except for last batch)
             if (i + BATCH_SIZE < Math.min(rbls.length, 15)) {
                 await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
@@ -432,12 +458,20 @@ async function loadDepartures(station, isSilentRefresh = false) {
         
         const results = allResults;
         
+        if (!isSilentRefresh) {
+            const successfulLoads = results.filter(r => r !== null && r.length > 0).length;
+            updateLoadingStatus(`Verarbeite ${successfulLoads} Haltestellen...`);
+        }
+        
         // Merge all monitors from all RBLs
         const allMonitors = results
             .filter(r => r !== null)
             .flat();
         
         if (allMonitors.length > 0) {
+            if (!isSilentRefresh) {
+                updateLoadingStatus('Erstelle Ansicht...');
+            }
             displayDepartures(fullStation, allMonitors);
             
             // Start auto-refresh only on initial load (not silent refresh)
@@ -915,6 +949,20 @@ function showLoading(show) {
     } else {
         loading.classList.add('hidden');
         results.style.display = 'block';
+        // Clear status when hiding
+        updateLoadingStatus('');
+    }
+}
+
+function updateLoadingStatus(message) {
+    const statusEl = document.getElementById('loading-status');
+    if (statusEl) {
+        statusEl.textContent = message;
+        if (message) {
+            statusEl.style.display = 'block';
+        } else {
+            statusEl.style.display = 'none';
+        }
     }
 }
 
