@@ -24,7 +24,14 @@ Die App ist live auf GitHub Pages verfügbar:
 
 Die App nutzt die **öffentliche Wiener Linien OGD API** ohne API-Schlüssel.
 
-**CORS-Lösung:** Da die Wiener Linien API keine direkten Browser-Anfragen von externen Domains erlaubt, verwendet die App den öffentlichen CORS-Proxy `api.codetabs.com`. Dieser leitet die Anfragen weiter und fügt die notwendigen CORS-Header hinzu, damit die App im Browser funktioniert.
+**CORS-Lösung:** Da die Wiener Linien API keine direkten Browser-Anfragen von externen Domains erlaubt, nutzt die App CORS-Proxies. 
+
+⚡ **Empfohlen:** Eigener [Cloudflare Worker](CLOUDFLARE_SETUP.md) für 100% Zuverlässigkeit (kostenlos, 5 Min Setup)
+
+**Aktuelle Fallback-Strategie:**
+1. `api.allorigins.win` (primär)
+2. `corsproxy.io` (Fallback)
+3. Direkter Zugriff (Fallback)
 
 ## 🛠️ Installation und Einrichtung
 
