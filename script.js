@@ -456,15 +456,25 @@ function displayDepartures(station, monitors) {
     // Debug: Analyze U1 destinations by RBL (only for Kagraner Platz)
     if (station.name.includes('Kagraner') && !window._u1Analysis) {
         const u1Deps = allDepartures.filter(d => d.line === 'U1');
-        console.log(`✅ U1 at ${station.name}: ${u1Deps.length} departures → ${new Set(u1Deps.map(d => d.destination)).size} destinations (${Array.from(new Set(u1Deps.map(d => d.destination))).join(', ')})`);
+        const u1Groups = Object.values(grouped).filter(g => g.line === 'U1');
+        console.log(`✅ U1 at ${station.name}: ${u1Deps.length} departures → ${u1Groups.length} groups`);
+        u1Groups.forEach(g => console.log(`  - ${g.line} → ${g.destination} (Steig ${g.platform}): ${g.departures.map(d => d.countdown).join(', ')} min`));
         window._u1Analysis = true;
     }
+    
+    // Debug: Overall grouping stats
+    const groupStats = Object.values(grouped).reduce((acc, g) => {
+        acc[g.category] = (acc[g.category] || 0) + 1;
+        return acc;
+    }, {});
+    console.log(`📊 Groups at ${station.name}:`, groupStats, `(Total: ${Object.values(grouped).length})`);
 
-    // Remove duplicates: prefer entries with timeReal
+
+    // Remove duplicates: stricter matching
     const deduped = [];
     const seenKeys = new Set();
     
-    // Sort: entries with timeReal first
+    // Sort: entries with timeReal first, then by countdown
     allDepartures.sort((a, b) => {
         if (a.timeReal && !b.timeReal) return -1;
         if (!a.timeReal && b.timeReal) return 1;
@@ -472,32 +482,36 @@ function displayDepartures(station, monitors) {
     });
     
     allDepartures.forEach(dep => {
-        // Create unique key from line, destination, and countdown
-        // Round countdown to avoid duplicates with slight time differences
-        const roundedCountdown = Math.floor((dep.countdown || 0) / 1) * 1; // 1 minute tolerance
+        // Stricter deduplication: check timeReal OR timePlanned OR countdown
         const normalizedDest = dep.destination?.trim().toUpperCase() || 'UNBEKANNT';
-        const key = `${dep.line}|${normalizedDest}|${roundedCountdown}`;
+        const timeSignature = dep.timeReal || dep.timePlanned || `countdown-${dep.countdown}`;
+        const platformKey = dep.platform || 'no-platform';
+        const key = `${dep.line}|${platformKey}|${normalizedDest}|${timeSignature}`;
         
         if (!seenKeys.has(key)) {
             seenKeys.add(key);
             deduped.push(dep);
         } else {
-            // Duplicate found
-            console.log(`Removed duplicate: ${dep.line} → ${normalizedDest} in ${dep.countdown}min`);
+            console.log(`Removed duplicate: ${dep.line} → ${normalizedDest} @ ${dep.countdown}min`);
         }
     });
 
-    // Group by line + destination (not just towards)
+    // Multi-level grouping: Category (U-Bahn/Bus/Tram) → Line → Platform+Destination
     const grouped = {};
     deduped.forEach(dep => {
         const normalizedDest = dep.destination?.trim().toUpperCase() || 'UNBEKANNT';
-        const key = `${dep.line}|${normalizedDest}`;
+        const platformKey = dep.platform || '';
+        
+        // Group key: line + platform + destination
+        const key = `${dep.line}|${platformKey}|${normalizedDest}`;
+        
         if (!grouped[key]) {
             grouped[key] = {
                 line: dep.line,
                 destination: normalizedDest,
                 lineType: dep.lineType,
-                platform: dep.platform,
+                platform: platformKey,
+                category: getCategoryFromLineType(dep.lineType),
                 departures: []
             };
         }
@@ -510,8 +524,23 @@ function displayDepartures(station, monitors) {
         group.departures = group.departures.slice(0, 3);
     });
 
-    // Sort groups by first departure
+    // Sort groups: 1) Category (U-Bahn > Bus > Tram > Other), 2) Line number, 3) First departure
+    const categoryOrder = { 'ubahn': 0, 'bus': 1, 'tram': 2, 'other': 3 };
     const sortedGroups = Object.values(grouped).sort((a, b) => {
+        // 1. Category
+        const catDiff = (categoryOrder[a.category] || 99) - (categoryOrder[b.category] || 99);
+        if (catDiff !== 0) return catDiff;
+        
+        // 2. Line number (natural sort: U1 < U2 < U11)
+        const aLineNum = parseInt(a.line.replace(/\D/g, '')) || 0;
+        const bLineNum = parseInt(b.line.replace(/\D/g, '')) || 0;
+        if (aLineNum !== bLineNum) return aLineNum - bLineNum;
+        if (a.line !== b.line) return a.line.localeCompare(b.line);
+        
+        // 3. Platform
+        if (a.platform !== b.platform) return (a.platform || '').localeCompare(b.platform || '');
+        
+        // 4. First departure
         const aFirst = a.departures[0]?.countdown || 999;
         const bFirst = b.departures[0]?.countdown || 999;
         return aFirst - bFirst;
@@ -729,6 +758,13 @@ function determineLineType(lineName, apiType) {
     if (type.includes('tram') || type === 'pttramwayline') return 'tram';
     if (type.includes('bus') || type === 'ptbusline') return 'bus';
     return 'bus';
+}
+
+function getCategoryFromLineType(lineType) {
+    if (lineType === 'ubahn') return 'ubahn';
+    if (lineType === 'tram') return 'tram';
+    if (lineType === 'bus') return 'bus';
+    return 'other';
 }
 
 function getLineBadgeClass(lineName, lineType) {
