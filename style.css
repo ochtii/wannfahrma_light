@@ -350,27 +350,78 @@ button:active {
 }
 
 .line-badge {
-    min-width: 60px;
+    min-width: 70px;
     padding: 8px 12px;
     background: var(--secondary-color);
     color: white;
-    border-radius: 6px;
     text-align: center;
     font-weight: bold;
     margin-right: 15px;
     font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 4px;
 }
 
-.line-badge.u-bahn {
-    background: #0066cc;
+.line-icon {
+    font-size: 1.2rem;
+    line-height: 1;
 }
 
-.line-badge.tram {
-    background: #E20613;
+.line-number {
+    line-height: 1;
 }
 
+/* Bus - eckig */
 .line-badge.bus {
     background: #ff6600;
+    border-radius: 4px;
+}
+
+/* Straßenbahn - rund */
+.line-badge.tram {
+    background: #E20613;
+    border-radius: 50%;
+    min-width: 70px;
+    height: 70px;
+    padding: 0;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.line-badge.tram .line-icon {
+    font-size: 1rem;
+}
+
+.line-badge.tram .line-number {
+    font-size: 1rem;
+}
+
+/* U-Bahn - eckig mit Linienfarben */
+.line-badge.ubahn {
+    border-radius: 4px;
+}
+
+.line-badge.u1 {
+    background: #E20613; /* U1 Rot */
+}
+
+.line-badge.u2 {
+    background: #955BA5; /* U2 Lila */
+}
+
+.line-badge.u3 {
+    background: #F39100; /* U3 Orange */
+}
+
+.line-badge.u4 {
+    background: #109648; /* U4 Grün */
+}
+
+.line-badge.u6 {
+    background: #9C6830; /* U6 Braun */
 }
 
 .departure-info {
@@ -398,6 +449,67 @@ button:active {
 .platform {
     font-size: 0.85rem;
     color: var(--text-secondary);
+}
+
+.time-info {
+    display: flex;
+    gap: 12px;
+    margin-top: 6px;
+    font-size: 0.85rem;
+    flex-wrap: wrap;
+}
+
+.time-planned,
+.time-real,
+.time-diff {
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 500;
+}
+
+.time-planned {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+}
+
+.time-real {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.time-diff {
+    font-weight: bold;
+}
+
+.time-diff.ontime {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.dark-mode .time-diff.ontime {
+    background: rgba(46, 125, 50, 0.2);
+    color: #66bb6a;
+}
+
+.time-diff.delayed {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.dark-mode .time-diff.delayed {
+    background: rgba(198, 40, 40, 0.2);
+    color: #ef5350;
+}
+
+.time-diff.early {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.dark-mode .time-diff.early {
+    background: rgba(21, 101, 192, 0.2);
+    color: #42a5f5;
 }
 
 /* Loading */

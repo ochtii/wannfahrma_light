@@ -203,7 +203,8 @@ function displayDepartures(station, monitors) {
                 countdown: dep.departureTime?.countdown,
                 timeReal: dep.departureTime?.timeReal,
                 timePlanned: dep.departureTime?.timePlanned,
-                type: line.type
+                type: line.type,
+                lineType: determineLineType(line.name, line.type)
             })) || []
         ) || []
     ).sort((a, b) => (a.countdown || 999) - (b.countdown || 999));
@@ -217,12 +218,14 @@ function displayDepartures(station, monitors) {
             <div class="departures">
                 ${departuresList.length > 0 ? departuresList.map(dep => `
                     <div class="departure-item">
-                        <div class="line-badge ${getLineClass(dep.type || dep.line)}">
-                            ${dep.line}
+                        <div class="line-badge ${getLineBadgeClass(dep.line, dep.lineType)}">
+                            <span class="line-icon">${getLineIcon(dep.lineType)}</span>
+                            <span class="line-number">${dep.line}</span>
                         </div>
                         <div class="departure-info">
                             <div class="direction">${dep.towards || 'Unbekannt'}</div>
                             ${dep.platform ? `<div class="platform">Steig ${dep.platform}</div>` : ''}
+                            ${formatDepartureTimes(dep.timePlanned, dep.timeReal)}
                         </div>
                         <div class="countdown ${dep.timeReal ? 'realtime' : ''}">
                             ${formatCountdown(dep.countdown)}
@@ -368,12 +371,35 @@ function initMap() {
 }
 
 // Helper Functions
-function getLineClass(lineType) {
-    const line = String(lineType).toLowerCase();
-    if (line.includes('u') || line === 'ptmetro') return 'u-bahn';
-    if (line.includes('tram') || line === 'pttramwayline') return 'tram';
-    if (line.includes('bus') || line === 'ptbusline') return 'bus';
-    return '';
+function determineLineType(lineName, apiType) {
+    const name = String(lineName).toUpperCase();
+    if (/^U[1-6]$/.test(name)) return 'ubahn';
+    if (name.includes('D') || name.includes('O') || /^\d+$/.test(name)) return 'tram';
+    if (name.includes('A') || name.includes('B') || name.includes('N')) return 'bus';
+    
+    const type = String(apiType).toLowerCase();
+    if (type.includes('metro') || type === 'ptmetro') return 'ubahn';
+    if (type.includes('tram') || type === 'pttramwayline') return 'tram';
+    if (type.includes('bus') || type === 'ptbusline') return 'bus';
+    return 'bus';
+}
+
+function getLineBadgeClass(lineName, lineType) {
+    const base = lineType;
+    if (lineType === 'ubahn') {
+        const match = String(lineName).match(/U([1-6])/);
+        if (match) return `${base} u${match[1]}`;
+    }
+    return base;
+}
+
+function getLineIcon(lineType) {
+    switch(lineType) {
+        case 'ubahn': return '🚇';
+        case 'tram': return '🚊';
+        case 'bus': return '🚌';
+        default: return '🚌';
+    }
 }
 
 function formatCountdown(minutes) {
@@ -381,6 +407,43 @@ function formatCountdown(minutes) {
     if (minutes === 0) return 'Jetzt';
     if (minutes === 1) return '1 Min';
     return `${minutes} Min`;
+}
+
+function formatDepartureTimes(planned, real) {
+    if (!planned && !real) return '';
+    
+    const formatTime = (timestamp) => {
+        if (!timestamp) return null;
+        const date = new Date(timestamp);
+        return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    };
+    
+    const plannedTime = formatTime(planned);
+    const realTime = formatTime(real);
+    
+    if (!realTime || !planned || !real) {
+        return plannedTime ? `<div class="time-info">Plan: ${plannedTime}</div>` : '';
+    }
+    
+    const diff = Math.round((new Date(real) - new Date(planned)) / 60000);
+    const diffStr = diff > 0 ? `+${diff}` : diff < 0 ? `${diff}` : '±0';
+    const diffClass = diff > 0 ? 'delayed' : diff < 0 ? 'early' : 'ontime';
+    
+    return `
+        <div class="time-info">
+            <span class="time-planned">Plan: ${plannedTime}</span>
+            <span class="time-real">Ist: ${realTime}</span>
+            <span class="time-diff ${diffClass}">${diffStr} Min</span>
+        </div>
+    `;
+}
+
+function getLineClass(lineType) {
+    const line = String(lineType).toLowerCase();
+    if (line.includes('u') || line === 'ptmetro') return 'u-bahn';
+    if (line.includes('tram') || line === 'pttramwayline') return 'tram';
+    if (line.includes('bus') || line === 'ptbusline') return 'bus';
+    return '';
 }
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
