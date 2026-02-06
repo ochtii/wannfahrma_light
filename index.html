@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiener Linien Abfahrtsmonitor</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚇 Wiener Linien Abfahrtsmonitor</h1>
+            <p class="subtitle">Echtzeitinformationen für öffentliche Verkehrsmittel in Wien</p>
+        </header>
+
+        <div class="search-container">
+            <div class="search-tabs">
+                <button class="tab-btn active" data-tab="station">Stationssuche</button>
+                <button class="tab-btn" data-tab="nearby">Umkreissuche</button>
+                <button class="tab-btn" data-tab="map">Karte</button>
+            </div>
+
+            <!-- Stationssuche Tab -->
+            <div class="tab-content active" id="station-tab">
+                <div class="search-box">
+                    <input type="text" id="station-input" placeholder="Station suchen (z.B. Stephansplatz, Karlsplatz...)" autocomplete="off">
+                    <button id="search-btn">Suchen</button>
+                </div>
+                <div id="suggestions" class="suggestions"></div>
+            </div>
+
+            <!-- Umkreissuche Tab -->
+            <div class="tab-content" id="nearby-tab">
+                <div class="nearby-controls">
+                    <div class="input-group">
+                        <label>Koordinaten:</label>
+                        <input type="number" id="lat-input" placeholder="Breitengrad" step="0.000001" value="48.2082">
+                        <input type="number" id="lon-input" placeholder="Längengrad" step="0.000001" value="16.3738">
+                    </div>
+                    <div class="input-group">
+                        <label>Radius (Meter):</label>
+                        <input type="number" id="radius-input" value="500" min="100" max="2000" step="100">
+                    </div>
+                    <button id="nearby-btn">Stationen suchen</button>
+                    <button id="location-btn">📍 Mein Standort</button>
+                </div>
+            </div>
+
+            <!-- Karte Tab -->
+            <div class="tab-content" id="map-tab">
+                <div id="map"></div>
+                <div class="map-info">
+                    Klicken Sie auf die Karte, um Stationen in der Nähe zu finden
+                </div>
+            </div>
+        </div>
+
+        <!-- Ergebnisse -->
+        <div id="results" class="results">
+            <div class="welcome-message">
+                <h2>Willkommen!</h2>
+                <p>Suchen Sie nach einer Station oder nutzen Sie die Umkreissuche, um Abfahrtszeiten zu finden.</p>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Daten werden geladen...</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>Daten bereitgestellt von <a href="https://www.wienerlinien.at" target="_blank">Wiener Linien</a></p>
+        <p class="api-info">
+            <small>Benötigt API-Schlüssel von <a href="https://www.wienerlinien.at/ogd_realtime" target="_blank">Wiener Linien OGD</a></small>
+        </p>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
