@@ -229,13 +229,11 @@ function initTabs() {
             btn.classList.add('active');
             document.getElementById(`${tabName}-tab`).classList.add('active');
 
-            // When LEAVING station tab
-            if (previousTab === 'station' && tabName !== 'station') {
-                stopAutoRefresh();
-                const results = document.getElementById('results');
-                if (results) results.innerHTML = '';
-                currentStation = null; // Clear station completely
-            }
+            // ALWAYS stop auto-refresh and clear station on ANY tab change
+            stopAutoRefresh();
+            currentStation = null;
+            const results = document.getElementById('results');
+            if (results) results.innerHTML = '';
 
             if (tabName === 'map' && map) {
                 setTimeout(() => map.invalidateSize(), 100);
