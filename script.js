@@ -1,6 +1,5 @@
 // Wiener Linien API Configuration
-// WICHTIG: Ersetzen Sie 'YOUR_API_KEY' mit Ihrem API-Schlüssel von https://www.wienerlinien.at/ogd_realtime
-const API_KEY = 'YOUR_API_KEY';
+// Die öffentliche API benötigt keinen API-Schlüssel
 const API_BASE = 'https://www.wienerlinien.at/ogd_realtime';
 
 // State
@@ -14,7 +13,26 @@ document.addEventListener('DOMContentLoaded', () => {
     initStationSearch();
     initNearbySearch();
     initMap();
+    initThemeToggle();
 });
+
+// Theme Toggle
+function initThemeToggle() {
+    const themeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
+    
+    // Load saved theme preference or use dark mode as default
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        body.classList.remove('dark-mode');
+    }
+    
+    themeToggle.addEventListener('click', () => {
+        body.classList.toggle('dark-mode');
+        const isDark = body.classList.contains('dark-mode');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+}
 
 // Tab Navigation
 function initTabs() {
@@ -103,7 +121,7 @@ function displaySuggestions(stations) {
 
 // Search Stations via API
 async function searchStations(query) {
-    const url = `${API_BASE}/monitor?activateTrafficInfo=stoerungkurz&sender=${API_KEY}`;
+    const url = `${API_BASE}/monitor?activateTrafficInfo=stoerungkurz`;
     
     try {
         const response = await fetch(url);
@@ -143,7 +161,7 @@ async function loadDepartures(station) {
     
     try {
         // Use RBL if available, otherwise try with station name
-        let url = `${API_BASE}/monitor?sender=${API_KEY}`;
+        let url = `${API_BASE}/monitor`;
         
         if (station.rbl) {
             url += `&rbl=${station.rbl}`;
@@ -161,7 +179,7 @@ async function loadDepartures(station) {
         }
     } catch (error) {
         console.error('Error loading departures:', error);
-        showError('Fehler beim Laden der Abfahrten. Bitte überprüfen Sie Ihren API-Schlüssel.');
+        showError('Fehler beim Laden der Abfahrten. Bitte versuchen Sie es später erneut.');
     } finally {
         showLoading(false);
     }

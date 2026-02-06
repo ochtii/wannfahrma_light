@@ -7,11 +7,15 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="dark-mode">
     <div class="container">
         <header>
             <h1>🚇 Wiener Linien Abfahrtsmonitor</h1>
             <p class="subtitle">Echtzeitinformationen für öffentliche Verkehrsmittel in Wien</p>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Theme umschalten">
+                <span class="icon-light">☀️</span>
+                <span class="icon-dark">🌙</span>
+            </button>
         </header>
 
         <div class="search-container">
@@ -74,7 +78,7 @@
     <footer>
         <p>Daten bereitgestellt von <a href="https://www.wienerlinien.at" target="_blank">Wiener Linien</a></p>
         <p class="api-info">
-            <small>Benötigt API-Schlüssel von <a href="https://www.wienerlinien.at/ogd_realtime" target="_blank">Wiener Linien OGD</a></small>
+            <small>Nutzt die öffentliche <a href="https://www.wienerlinien.at/ogd_realtime" target="_blank">Wiener Linien OGD API</a></small>
         </p>
     </footer>
 

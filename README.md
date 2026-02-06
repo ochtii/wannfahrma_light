@@ -11,6 +11,7 @@ Eine moderne Web-App zur Anzeige von Echtzeitinformationen für öffentliche Ver
 - 📍 **Umkreissuche** - Finden Sie Stationen in Ihrer Nähe
 - 🗺️ **Interaktive Karte** - Visualisierung aller Stationen auf einer Karte
 - ⏱️ **Echtzeitdaten** - Aktuelle Abfahrtszeiten direkt von den Wiener Linien
+- 🌙 **Dark Mode** - Dunkles Design standardmäßig aktiviert (umschaltbar)
 - 📱 **Responsive Design** - Optimiert für Desktop, Tablet und Smartphone
 - 🎨 **Modernes UI** - Klares, benutzerfreundliches Design
 
@@ -19,13 +20,9 @@ Eine moderne Web-App zur Anzeige von Echtzeitinformationen für öffentliche Ver
 Die App ist live auf GitHub Pages verfügbar:
 👉 [https://ochtii.github.io/wannfahrma_light/](https://ochtii.github.io/wannfahrma_light/)
 
-## 📋 Voraussetzungen
+## � API-Information
 
-Um die API der Wiener Linien zu nutzen, benötigen Sie einen API-Schlüssel:
-
-1. Besuchen Sie [Wiener Linien Open Government Data](https://www.wienerlinien.at/ogd_realtime)
-2. Registrieren Sie sich für einen kostenlosen API-Zugang
-3. Erhalten Sie Ihren API-Schlüssel per E-Mail
+Die App nutzt die **öffentliche Wiener Linien OGD API**, die **keinen API-Schlüssel benötigt**. Die Echtzeitdaten sind frei zugänglich!
 
 ## 🛠️ Installation und Einrichtung
 
@@ -37,14 +34,7 @@ Um die API der Wiener Linien zu nutzen, benötigen Sie einen API-Schlüssel:
    cd wannfahrma_light
    ```
 
-2. **API-Schlüssel konfigurieren:**
-   
-   Öffnen Sie `script.js` und ersetzen Sie `YOUR_API_KEY` mit Ihrem persönlichen API-Schlüssel:
-   ```javascript
-   const API_KEY = 'YOUR_API_KEY'; // ← Hier Ihren API-Schlüssel eintragen
-   ```
-
-3. **App starten:**
+2. **App starten:**
    
    Öffnen Sie `index.html` in Ihrem Browser oder nutzen Sie einen lokalen Webserver:
    ```bash
@@ -58,7 +48,7 @@ Um die API der Wiener Linien zu nutzen, benötigen Sie einen API-Schlüssel:
    # Rechtsklick auf index.html → "Open with Live Server"
    ```
 
-4. **Im Browser öffnen:**
+3. **Im Browser öffnen:**
    
    Navigieren Sie zu `http://localhost:8000` (oder dem entsprechenden Port)
 
@@ -71,12 +61,7 @@ Um die API der Wiener Linien zu nutzen, benötigen Sie einen API-Schlüssel:
    - Wählen Sie Branch: `main` und Folder: `/ (root)`
    - Klicken Sie auf "Save"
 
-3. **API-Schlüssel setzen:**
-   - **WICHTIG:** Committen Sie niemals Ihren echten API-Schlüssel!
-   - Verwenden Sie GitHub Secrets oder eine alternative Lösung
-   - Alternativ: Hardcoden Sie den Schlüssel nur nach dem Deployment direkt auf GitHub
-
-4. Nach wenigen Minuten ist Ihre App unter `https://[username].github.io/[repository-name]/` verfügbar
+3. Nach wenigen Minuten ist Ihre App unter `https://[username].github.io/[repository-name]/` verfügbar
 
 ## 📖 Verwendung
 
@@ -102,6 +87,12 @@ Um die API der Wiener Linien zu nutzen, benötigen Sie einen API-Schlüssel:
 3. Klicken Sie auf einen Marker für Stationsdetails
 4. Klicken Sie auf einen Punkt auf der Karte, um nahegelegene Stationen zu finden
 
+### Dark Mode
+
+- Dark Mode ist standardmäßig aktiviert
+- Klicken Sie auf das Theme-Symbol (☀️/🌙) oben rechts zum Umschalten
+- Ihre Präferenz wird automatisch gespeichert
+
 ## 🔧 Technologien
 
 - **HTML5** - Struktur und Semantik
@@ -117,11 +108,16 @@ Um die API der Wiener Linien zu nutzen, benötigen Sie einen API-Schlüssel:
 - ✅ Safari (neueste Versionen)
 - ✅ Mobile Browser (iOS Safari, Chrome Mobile)
 
+## 🎨 Screenshots & Design
+
+- **Dark Mode:** Augenschonendes dunkles Design als Standard
+- **Light Mode:** Heller Modus für Tageslicht verfügbar
+- **Wiener Linien Farben:** Authentisches Corporate Design
+
 ## 🔐 Sicherheitshinweise
 
-- **Niemals** Ihren API-Schlüssel in öffentlichen Repositories committen
-- Verwenden Sie Umgebungsvariablen oder Secrets für sensible Daten
-- Für produktive Anwendungen: Implementieren Sie ein Backend-Proxy
+- Die öffentliche Wiener Linien API benötigt keine Authentifizierung
+- Alle Daten sind frei zugänglich und Open Data
 
 ## 📚 API-Dokumentation
 
@@ -144,9 +140,9 @@ MIT License - Siehe [LICENSE](LICENSE) für Details
 
 ## 🐛 Bekannte Probleme
 
-- Die API erfordert einen gültigen Schlüssel - ohne Schlüssel werden nur Fallback-Daten angezeigt
-- Einige kleinere Stationen könnten nicht verfügbar sein
+- Einige kleinere Stationen könnten nicht in den Fallback-Daten enthalten sein
 - Echtzeitdaten können bei Störungen ungenau sein
+- API-Rate-Limits können bei sehr häufigen Anfragen greifen
 
 ## 📞 Kontakt
 
