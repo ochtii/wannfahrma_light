@@ -11,6 +11,8 @@ Mit einem eigenen Cloudflare Worker hast du:
 - ✅ **100% Verfügbarkeit**
 - ✅ **Schnell** (Cloudflare CDN)
 - ✅ **Kostenlos** (100.000 Requests/Tag im Free-Plan)
+- ✅ **Retry-Logik** (automatische Wiederholung bei 403/500/502/503 Fehlern)
+- ✅ **10s Timeout** (keine hängenden Requests)
 
 ---
 
