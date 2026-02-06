@@ -453,23 +453,6 @@ function displayDepartures(station, monitors) {
         ) || []
     );
     
-    // Debug: Analyze U1 destinations by RBL (only for Kagraner Platz)
-    if (station.name.includes('Kagraner') && !window._u1Analysis) {
-        const u1Deps = allDepartures.filter(d => d.line === 'U1');
-        const u1Groups = Object.values(grouped).filter(g => g.line === 'U1');
-        console.log(`✅ U1 at ${station.name}: ${u1Deps.length} departures → ${u1Groups.length} groups`);
-        u1Groups.forEach(g => console.log(`  - ${g.line} → ${g.destination} (Steig ${g.platform}): ${g.departures.map(d => d.countdown).join(', ')} min`));
-        window._u1Analysis = true;
-    }
-    
-    // Debug: Overall grouping stats
-    const groupStats = Object.values(grouped).reduce((acc, g) => {
-        acc[g.category] = (acc[g.category] || 0) + 1;
-        return acc;
-    }, {});
-    console.log(`📊 Groups at ${station.name}:`, groupStats, `(Total: ${Object.values(grouped).length})`);
-
-
     // Remove duplicates: stricter matching
     const deduped = [];
     const seenKeys = new Set();
@@ -517,6 +500,20 @@ function displayDepartures(station, monitors) {
         }
         grouped[key].departures.push(dep);
     });
+
+    // Debug: Analyze grouping
+    if (station.name.includes('Kagraner') && !window._u1Analysis) {
+        const u1Groups = Object.values(grouped).filter(g => g.line === 'U1');
+        console.log(`✅ U1 at ${station.name}: ${u1Groups.length} groups`);
+        u1Groups.forEach(g => console.log(`  - ${g.line} → ${g.destination} (Steig ${g.platform}): ${g.departures.map(d => d.countdown).join(', ')} min`));
+        window._u1Analysis = true;
+    }
+    
+    const groupStats = Object.values(grouped).reduce((acc, g) => {
+        acc[g.category] = (acc[g.category] || 0) + 1;
+        return acc;
+    }, {});
+    console.log(`📊 Groups at ${station.name}:`, groupStats, `(Total: ${Object.values(grouped).length})`);
 
     // Sort departures within each group and take first 3
     Object.values(grouped).forEach(group => {
