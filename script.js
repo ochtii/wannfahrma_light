@@ -14,6 +14,8 @@ let currentMarkers = [];
 let stations = [];
 let favorites = [];
 let recentSearches = [];
+let autoRefreshInterval = null;
+let currentStation = null;
 
 // LocalStorage Keys
 const STORAGE_KEYS = {
@@ -223,11 +225,44 @@ function initTabs() {
             btn.classList.add('active');
             document.getElementById(`${tabName}-tab`).classList.add('active');
 
+            // Stop auto-refresh when switching tabs
+            stopAutoRefresh();
+            
+            // Clear results when switching away from station tab
+            if (tabName !== 'station') {
+                const results = document.getElementById('results');
+                if (results) results.innerHTML = '';
+                currentStation = null;
+            }
+
             if (tabName === 'map' && map) {
                 setTimeout(() => map.invalidateSize(), 100);
             }
         });
     });
+}
+
+function stopAutoRefresh() {
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+        console.log('🛑 Auto-refresh stopped');
+    }
+}
+
+function startAutoRefresh(station) {
+    stopAutoRefresh(); // Clear any existing interval
+    currentStation = station;
+    
+    // Refresh every 10 seconds
+    autoRefreshInterval = setInterval(() => {
+        if (currentStation) {
+            console.log('🔄 Auto-refreshing departures...');
+            loadDepartures(currentStation, true); // true = silent refresh
+        }
+    }, 10000);
+    
+    console.log('▶️ Auto-refresh started (10s interval)');
 }
 
 // Station Search
@@ -296,15 +331,21 @@ function displaySuggestions(stations) {
 }
 
 // Load Departures - Mit CORS-Proxy
-async function loadDepartures(station) {
-    showLoading(true);
+async function loadDepartures(station, isSilentRefresh = false) {
+    if (!isSilentRefresh) {
+        showLoading(true);
+        stopAutoRefresh(); // Stop old refresh
+        currentStation = station; // Update current station
+    }
     
     // Ensure we have the latest station data with all RBLs
     // This fixes issues with old favorites/recent searches that don't have rbls array
     const fullStation = stations.find(s => s.rbl === station.rbl) || station;
     
-    // Add to recent searches with full data
-    addRecentSearch(fullStation);
+    // Add to recent searches with full data (only on initial load)
+    if (!isSilentRefresh) {
+        addRecentSearch(fullStation);
+    }
     
     try {
         // Use all RBLs for the station (fallback to single rbl for backwards compatibility)
@@ -398,14 +439,22 @@ async function loadDepartures(station) {
         
         if (allMonitors.length > 0) {
             displayDepartures(fullStation, allMonitors);
+            
+            // Start auto-refresh only on initial load (not silent refresh)
+            if (!isSilentRefresh) {
+                startAutoRefresh(fullStation);
+            }
         } else {
             showError('Keine Abfahrtsdaten verfügbar');
         }
     } catch (error) {
         console.error('API Error:', error);
         showError(`Fehler beim Laden der Abfahrten: ${error.message}`);
+        stopAutoRefresh(); // Stop refresh on error
     } finally {
-        showLoading(false);
+        if (!isSilentRefresh) {
+            showLoading(false);
+        }
     }
 }
 
@@ -548,7 +597,10 @@ function displayDepartures(station, monitors) {
             <div class="station-header">
                 <div class="station-header-content">
                     <h3>${station.name}</h3>
-                    <div class="station-info">${station.municipality || ''}</div>
+                    <div class="station-info">
+                        ${station.municipality || ''} 
+                        <span class="auto-refresh-indicator" title="Automatische Aktualisierung alle 10 Sekunden">🔄 Live</span>
+                    </div>
                 </div>
                 <button class="favorite-btn ${isFavorite(station.rbl) ? 'active' : ''}" 
                         onclick="toggleFavorite(${JSON.stringify(station).replace(/"/g, '&quot;')}); this.classList.toggle('active');" 
