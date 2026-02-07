@@ -72,18 +72,7 @@ function initThemeToggle() {
 
 // Device Mode Toggle
 function initDeviceModeToggle() {
-    const toggle = document.getElementById('device-mode-toggle');
-    const currentIcon = document.getElementById('device-mode-current');
-    const menu = document.getElementById('device-mode-menu');
-    const options = document.querySelectorAll('.device-mode-option');
-    
-    // Device mode icons
-    const modeIcons = {
-        auto: '🔄',
-        desktop: '💻',
-        tablet: '📱',
-        mobile: '📱'
-    };
+    const buttons = document.querySelectorAll('.device-mode-btn');
     
     // Load saved device mode or default to auto
     let deviceMode = localStorage.getItem(STORAGE_KEYS.DEVICE_MODE) || 'auto';
@@ -91,69 +80,63 @@ function initDeviceModeToggle() {
     // Apply device mode on init
     applyDeviceMode(deviceMode);
     
-    // Toggle menu
-    currentIcon.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggle.classList.toggle('active');
-    });
-    
-    // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!toggle.contains(e.target)) {
-            toggle.classList.remove('active');
-        }
-    });
-    
-    // Handle mode selection
-    options.forEach(option => {
-        option.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const mode = option.dataset.mode;
+    // Handle button clicks
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            const mode = button.dataset.mode;
             deviceMode = mode;
             localStorage.setItem(STORAGE_KEYS.DEVICE_MODE, mode);
             applyDeviceMode(mode);
-            toggle.classList.remove('active');
         });
     });
     
-    // Update active state and icon
+    // Update active state and apply CSS
     function applyDeviceMode(mode) {
         // Update body attribute
         document.body.setAttribute('data-device-mode', mode);
         
-        // Update current icon
-        currentIcon.textContent = modeIcons[mode];
-        
-        // Update active option
-        options.forEach(opt => {
-            opt.classList.toggle('active', opt.dataset.mode === mode);
+        // Update active button
+        buttons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.mode === mode);
         });
         
         // Apply CSS based on mode
         const mobileCSS = document.getElementById('mobile-css');
         const tabletCSS = document.getElementById('tablet-css');
-        const responsiveCSS = document.querySelector('link[href=\"css/responsive.css\"]');
+        const responsiveCSS = document.querySelector('link[href="css/responsive.css"]');
         
         if (mode === 'auto') {
             // Let responsive.css handle it
-            mobileCSS.disabled = true;
-            tabletCSS.disabled = true;
-            responsiveCSS.disabled = false;
+            if (mobileCSS) mobileCSS.remove();
+            if (tabletCSS) tabletCSS.remove();
+            if (responsiveCSS) responsiveCSS.disabled = false;
         } else if (mode === 'mobile') {
-            // Force mobile view
-            mobileCSS.disabled = false;
-            tabletCSS.disabled = true;
-            responsiveCSS.disabled = true;
+            // Force mobile view - enable mobile.css
+            if (responsiveCSS) responsiveCSS.disabled = true;
+            if (tabletCSS) tabletCSS.remove();
+            if (!document.getElementById('mobile-css')) {
+                const link = document.createElement('link');
+                link.id = 'mobile-css';
+                link.rel = 'stylesheet';
+                link.href = 'css/mobile.css';
+                document.head.appendChild(link);
+            }
         } else if (mode === 'tablet') {
-            // Force tablet view
-            mobileCSS.disabled = true;
-            tabletCSS.disabled = false;
-            responsiveCSS.disabled = true;
+            // Force tablet view - enable tablet.css
+            if (responsiveCSS) responsiveCSS.disabled = true;
+            if (mobileCSS) mobileCSS.remove();
+            if (!document.getElementById('tablet-css')) {
+                const link = document.createElement('link');
+                link.id = 'tablet-css';
+                link.rel = 'stylesheet';
+                link.href = 'css/tablet.css';
+                document.head.appendChild(link);
+            }
         } else {
-            // Desktop mode - disable device-specific CSS
-            mobileCSS.disabled = true;
-            tabletCSS.disabled = true;
-            responsiveCSS.disabled = false;
+            // Desktop mode - use responsive.css only
+            if (mobileCSS) mobileCSS.remove();
+            if (tabletCSS) tabletCSS.remove();
+            if (responsiveCSS) responsiveCSS.disabled = false;
         }
         
         console.log(`🖥️ Device mode: ${mode}`);

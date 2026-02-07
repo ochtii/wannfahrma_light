@@ -17,9 +17,6 @@
     <link rel="stylesheet" href="css/badges.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/responsive.css">
-    <!-- Device-specific CSS (loaded dynamically) -->
-    <link rel="stylesheet" href="css/mobile.css" id="mobile-css" disabled>
-    <link rel="stylesheet" href="css/tablet.css" id="tablet-css" disabled>
 </head>
 <body class="dark-mode">
     <div class="container">
@@ -30,26 +27,19 @@
                 <span class="icon-light">☀️</span>
                 <span class="icon-dark">🌙</span>
             </button>
-            <div class="device-mode-toggle" id="device-mode-toggle" title="Geräte-Ansicht">
-                <div class="device-mode-current" id="device-mode-current">💻</div>
-                <div class="device-mode-menu" id="device-mode-menu">
-                    <button class="device-mode-option" data-mode="auto" title="Automatisch (Bildschirmgröße)">
-                        <span class="mode-icon">🔄</span>
-                        <span class="mode-label">Auto</span>
-                    </button>
-                    <button class="device-mode-option" data-mode="desktop" title="Desktop-Ansicht">
-                        <span class="mode-icon">💻</span>
-                        <span class="mode-label">Desktop</span>
-                    </button>
-                    <button class="device-mode-option" data-mode="tablet" title="Tablet-Ansicht">
-                        <span class="mode-icon">📱</span>
-                        <span class="mode-label">Tablet</span>
-                    </button>
-                    <button class="device-mode-option" data-mode="mobile" title="Smartphone-Ansicht">
-                        <span class="mode-icon">📱</span>
-                        <span class="mode-label">Mobile</span>
-                    </button>
-                </div>
+            <div class="device-mode-buttons" id="device-mode-buttons">
+                <button class="device-mode-btn" data-mode="auto" title="Automatisch (Bildschirmgröße)">
+                    🔄
+                </button>
+                <button class="device-mode-btn" data-mode="desktop" title="Desktop-Ansicht">
+                    💻
+                </button>
+                <button class="device-mode-btn" data-mode="tablet" title="Tablet-Ansicht">
+                    📱
+                </button>
+                <button class="device-mode-btn" data-mode="mobile" title="Smartphone-Ansicht">
+                    📱
+                </button>
             </div>
         </header>
 
