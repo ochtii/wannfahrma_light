@@ -16,11 +16,13 @@ let favorites = [];
 let recentSearches = [];
 let autoRefreshInterval = null;
 let currentStation = null;
+let viewMode = localStorage.getItem('wl_view_mode') || 'normal'; // 'normal' or 'compact'
 
 // LocalStorage Keys
 const STORAGE_KEYS = {
     FAVORITES: 'wl_favorites',
-    RECENT: 'wl_recent_searches'
+    RECENT: 'wl_recent_searches',
+    VIEW_MODE: 'wl_view_mode'
 };
 
 // Initialize App
@@ -636,40 +638,84 @@ function displayDepartures(station, monitors) {
                         <span class="auto-refresh-indicator" title="Automatische Aktualisierung alle 10 Sekunden">🔄 Live</span>
                     </div>
                 </div>
-                <button class="favorite-btn ${isFavorite(station.rbl) ? 'active' : ''}" 
-                        onclick="toggleFavorite(${JSON.stringify(station).replace(/"/g, '&quot;')}); this.classList.toggle('active');" 
-                        title="${isFavorite(station.rbl) ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}">
-                    ⭐
-                </button>
+                <div class="station-actions">
+                    <button class="view-toggle-btn" onclick="toggleViewMode()" title="${viewMode === 'normal' ? 'Kompakte Ansicht' : 'Normale Ansicht'}">
+                        ${viewMode === 'normal' ? '📋' : '📊'}
+                    </button>
+                    <button class="favorite-btn ${isFavorite(station.rbl) ? 'active' : ''}" 
+                            onclick="toggleFavorite(${JSON.stringify(station).replace(/"/g, '&quot;')}); this.classList.toggle('active');" 
+                            title="${isFavorite(station.rbl) ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}">
+                        ⭐
+                    </button>
+                </div>
             </div>
-            <div class="departures-grouped">
-                ${sortedGroups.length > 0 ? sortedGroups.map(group => `
-                    <div class="line-group">
-                        <div class="line-group-header">
-                            <div class="line-badge ${getLineBadgeClass(group.line, group.lineType)}">
-                                <span class="line-icon">${getLineIcon(group.lineType)}</span>
-                                <span class="line-number">${group.line}</span>
-                            </div>
-                            <div class="line-group-info">
-                                <div class="direction">${group.destination || 'Unbekannt'}</div>
-                                ${group.platform ? `<div class="platform">Steig ${group.platform}</div>` : ''}
-                            </div>
-                        </div>
-                        <div class="departure-times">
-                            ${group.departures.map(dep => `
-                                <div class="departure-time-item">
-                                    <div class="countdown ${dep.timeReal ? 'realtime' : ''}">
+            <div class="departures-grouped ${viewMode === 'compact' ? 'compact-view' : ''}">
+                ${sortedGroups.length > 0 ? (viewMode === 'compact' ? 
+                    // Compact View: Table-like layout
+                    sortedGroups.map(group => 
+                        group.departures.map(dep => `
+                            <div class="departure-compact">
+                                <div class="compact-line ${getLineBadgeClass(group.line, group.lineType)}">
+                                    <span class="compact-icon">${getLineIcon(group.lineType)}</span>
+                                    <span class="compact-number">${group.line}</span>
+                                </div>
+                                <div class="compact-destination">
+                                    <div class="compact-dest-name">${group.destination}</div>
+                                    ${group.platform ? `<div class="compact-platform">Stg. ${group.platform}</div>` : ''}
+                                </div>
+                                <div class="compact-time">
+                                    <div class="compact-countdown ${dep.timeReal ? 'realtime' : ''}">
                                         ${formatCountdown(dep.countdown)}
                                     </div>
-                                    ${formatDepartureTimes(dep.timePlanned, dep.timeReal)}
+                                    <div class="compact-clock">${formatTime(dep.timeReal || dep.timePlanned)}</div>
                                 </div>
-                            `).join('')}
+                            </div>
+                        `).join('')
+                    ).join('') :
+                    // Normal View: Current grouped layout
+                    sortedGroups.map(group => `
+                        <div class="line-group">
+                            <div class="line-group-header">
+                                <div class="line-badge ${getLineBadgeClass(group.line, group.lineType)}">
+                                    <span class="line-icon">${getLineIcon(group.lineType)}</span>
+                                    <span class="line-number">${group.line}</span>
+                                </div>
+                                <div class="line-group-info">
+                                    <div class="direction">${group.destination || 'Unbekannt'}</div>
+                                    ${group.platform ? `<div class="platform">Steig ${group.platform}</div>` : ''}
+                                </div>
+                            </div>
+                            <div class="departure-times">
+                                ${group.departures.map(dep => `
+                                    <div class="departure-time-item">
+                                        <div class="countdown ${dep.timeReal ? 'realtime' : ''}">
+                                            ${formatCountdown(dep.countdown)}
+                                        </div>
+                                        ${formatDepartureTimes(dep.timePlanned, dep.timeReal)}
+                                    </div>
+                                `).join('')}
+                            </div>
                         </div>
-                    </div>
-                `).join('') : '<div class="empty-message">Keine Abfahrten in den nächsten Minuten</div>'}
+                    `).join('')) : '<div class="empty-message">Keine Abfahrten in den nächsten Minuten</div>'}
             </div>
         </div>
     `;
+}
+
+// Toggle View Mode
+function toggleViewMode() {
+    viewMode = viewMode === 'normal' ? 'compact' : 'normal';
+    localStorage.setItem(STORAGE_KEYS.VIEW_MODE, viewMode);
+    
+    // Re-render if a station is currently displayed
+    if (currentStation) {
+        // Get current monitors from last successful load
+        const resultsDiv = document.getElementById('results');
+        if (resultsDiv.querySelector('.station-card')) {
+            // Trigger a silent refresh to re-render with new view
+            loadDepartures(currentStation, false);
+        }
+    }
 }
 
 // Nearby Search
@@ -875,14 +921,14 @@ function formatCountdown(minutes) {
     return `${minutes} Min`;
 }
 
+function formatTime(timestamp) {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
+
 function formatDepartureTimes(planned, real) {
     if (!planned && !real) return '';
-    
-    const formatTime = (timestamp) => {
-        if (!timestamp) return null;
-        const date = new Date(timestamp);
-        return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-    };
     
     const plannedTime = formatTime(planned);
     const realTime = formatTime(real);

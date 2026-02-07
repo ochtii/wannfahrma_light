@@ -456,6 +456,31 @@ button:active {
     margin-bottom: 5px;
 }
 
+.station-actions {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.view-toggle-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.view-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
 .station-header .favorite-btn {
     color: white;
     font-size: 2rem;
@@ -502,6 +527,97 @@ button:active {
     padding: 20px;
 }
 
+/* Compact View */
+.departures-grouped.compact-view {
+    padding: 10px;
+}
+
+.departure-compact {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--background);
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.departure-compact:hover {
+    background: var(--bg-secondary);
+    transform: translateX(3px);
+}
+
+.departure-compact:last-child {
+    border-bottom: none;
+}
+
+.compact-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    min-width: 65px;
+    justify-content: center;
+}
+
+.compact-icon {
+    font-size: 1rem;
+}
+
+.compact-number {
+    font-size: 0.95rem;
+}
+
+.compact-destination {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.compact-dest-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.compact-platform {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.compact-time {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    min-width: 60px;
+}
+
+.compact-countdown {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.compact-countdown.realtime {
+    color: var(--primary-color);
+}
+
+.compact-clock {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Normal View (existing styles) */
 .line-group {
     background: var(--background);
     border-radius: 12px;
@@ -654,6 +770,16 @@ button:active {
 .line-badge.u6 {
     background: #9C6830; /* U6 Braun */
 }
+
+/* Compact Line Badge Colors */
+.compact-line.u1 { background: #E20613; color: white; }
+.compact-line.u2 { background: #955BA5; color: white; }
+.compact-line.u3 { background: #F39100; color: white; }
+.compact-line.u4 { background: #109648; color: white; }
+.compact-line.u6 { background: #9C6830; color: white; }
+.compact-line.u-bahn { background: var(--secondary-color); color: white; }
+.compact-line.bus { background: #0072BC; color: white; }
+.compact-line.tram { background: #D82020; color: white; }
 
 .departure-info,
 .line-group-info {
