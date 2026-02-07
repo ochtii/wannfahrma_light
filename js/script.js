@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Load Stations from JSON
 async function loadStations() {
     try {
-        const response = await fetch('stations_full.json');
+        const response = await fetch('data/stations_full.json');
         if (!response.ok) throw new Error('Failed to load stations');
         const data = await response.json();
         

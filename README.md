@@ -19,7 +19,27 @@ Eine moderne Web-App zur Anzeige von Echtzeitinformationen für öffentliche Ver
 
 Die App ist live auf GitHub Pages verfügbar:
 👉 [https://ochtii.github.io/wannfahrma_light/](https://ochtii.github.io/wannfahrma_light/)
+## 📁 Projektstruktur
 
+```
+wannfahrma_light/
+├── index.html              # Hauptseite (GitHub Pages Entry Point)
+├── css/
+│   └── style.css          # Alle Styles (Dark/Light Mode)
+├── js/
+│   └── script.js          # Haupt-JavaScript (API, UI, Map)
+├── data/
+│   ├── stations_full.json # Stationsdaten (1710 Stationen)
+│   └── worker.js          # Cloudflare Worker Code (CORS-Proxy)
+├── legal/
+│   ├── impressum.html     # Impressum (§5 ECG)
+│   └── datenschutz.html   # Datenschutzerklärung (DSGVO)
+├── assets/
+│   └── favicon.svg        # App-Icon
+├── .gitignore
+├── LICENSE                # MIT License
+└── README.md             # Diese Datei
+```
 ## � API-Information
 
 Die App nutzt die **öffentliche Wiener Linien OGD API** ohne API-Schlüssel.
