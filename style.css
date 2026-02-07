@@ -889,6 +889,21 @@ footer a:hover {
     margin-top: 10px;
 }
 
+.legal-links {
+    margin-top: 15px;
+    font-size: 0.9rem;
+}
+
+.legal-links a {
+    color: var(--text-secondary);
+    font-weight: 400;
+    transition: color 0.2s ease;
+}
+
+.legal-links a:hover {
+    color: var(--primary-color);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     header h1 {
