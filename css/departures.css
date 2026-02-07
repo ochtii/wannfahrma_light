@@ -1,0 +1,302 @@
+/* Departures: Station Cards, Line Groups, Times, Compact View */
+
+/* Results Container */
+.results {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: var(--shadow);
+}
+
+.welcome-message {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+}
+
+.welcome-message h2 {
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+/* Station Card */
+.station-card {
+    margin-bottom: 30px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.station-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+}
+
+.station-header {
+    background: linear-gradient(135deg, var(--primary-color), #ff1744);
+    color: white;
+    padding: 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.station-header-content {
+    flex: 1;
+}
+
+.station-header h3 {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.station-actions {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.station-header .favorite-btn {
+    color: white;
+    font-size: 2rem;
+    opacity: 0.5;
+    margin-top: -5px;
+}
+
+.station-header .favorite-btn:hover {
+    opacity: 0.8;
+}
+
+.station-header .favorite-btn.active {
+    opacity: 1;
+}
+
+.station-info {
+    font-size: 0.9rem;
+    opacity: 0.95;
+}
+
+.auto-refresh-indicator {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 2px 8px;
+    background: rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    border-radius: 4px;
+    color: #4CAF50;
+    font-size: 0.85em;
+    font-weight: 500;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.departures {
+    padding: 20px;
+}
+
+.departures-grouped {
+    padding: 20px;
+}
+
+/* Compact View */
+.departures-grouped.compact-view {
+    padding: 10px;
+}
+
+.departure-compact {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--background);
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.departure-compact:hover {
+    background: var(--bg-secondary);
+    transform: translateX(3px);
+}
+
+.departure-compact:last-child {
+    border-bottom: none;
+}
+
+.compact-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    min-width: 65px;
+    justify-content: center;
+}
+
+.compact-icon {
+    font-size: 1rem;
+}
+
+.compact-number {
+    font-size: 0.95rem;
+}
+
+.compact-destination {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.compact-dest-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.compact-platform {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.compact-time {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    min-width: 60px;
+}
+
+.compact-countdown {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.compact-countdown.realtime {
+    color: var(--primary-color);
+}
+
+.compact-clock {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Normal View */
+.line-group {
+    background: var(--background);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    padding: 16px;
+    border: 2px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.line-group:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .line-group:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.line-group-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.line-group-info {
+    flex: 1;
+}
+
+.departure-times {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.departure-time-item {
+    flex: 1;
+    min-width: 140px;
+    padding: 10px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.departure-time-item .countdown {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 6px;
+    text-align: center;
+}
+
+.departure-time-item .time-info {
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.8rem;
+}
+
+.departure-time-item .time-info > span {
+    display: block;
+    text-align: center;
+}
+
+.departure-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: var(--background);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+}
+
+.departure-item:hover {
+    background: var(--border-color);
+    transform: translateX(5px);
+}
+
+.departure-info {
+    flex: 1;
+}
+
+.direction {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 3px;
+    font-size: 1.05rem;
+}
+
+.countdown {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    min-width: 80px;
+    text-align: right;
+}
+
+.countdown.realtime {
+    color: var(--success-color);
+}
+
+.platform {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}

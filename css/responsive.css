@@ -1,0 +1,214 @@
+/* Responsive Design: Mobile & Tablet Optimizations */
+
+@media (max-width: 768px) {
+    /* Header */
+    header h1 {
+        font-size: 2rem;
+    }
+
+    .subtitle {
+        font-size: 1rem;
+    }
+
+    .theme-toggle {
+        top: 15px;
+        right: 15px;
+        padding: 8px 12px;
+        font-size: 1.1rem;
+    }
+
+    /* Tabs */
+    .search-tabs {
+        flex-direction: column;
+    }
+
+    .tab-btn {
+        border-bottom: none;
+        border-left: 3px solid transparent;
+    }
+
+    .tab-btn.active {
+        border-left-color: var(--primary-color);
+    }
+
+    /* Search */
+    .search-box {
+        flex-direction: column;
+    }
+
+    .input-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .input-group label {
+        min-width: auto;
+    }
+
+    /* Departures */
+    .departure-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .countdown {
+        text-align: left;
+    }
+
+    .station-header {
+        flex-direction: column;
+    }
+
+    .station-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    /* Line Badges */
+    .line-badge {
+        min-width: 60px;
+        font-size: 1rem;
+        padding: 6px 10px;
+    }
+
+    .line-badge.tram {
+        min-width: 60px;
+        height: 60px;
+    }
+
+    /* Departure Times */
+    .departure-times {
+        flex-direction: column;
+    }
+
+    .departure-time-item {
+        min-width: 100%;
+    }
+
+    /* Compact View */
+    .compact-line {
+        min-width: 55px;
+        padding: 5px 8px;
+    }
+
+    .compact-dest-name {
+        font-size: 0.85rem;
+    }
+
+    .compact-countdown {
+        font-size: 1rem;
+    }
+
+    /* Map */
+    #map {
+        height: 400px;
+    }
+
+    /* Tooltips */
+    .tooltip-text {
+        width: 240px;
+        font-size: 0.8rem;
+        padding: 10px 14px;
+    }
+
+    /* Recent Searches */
+    .recent-item-compact {
+        font-size: 0.85rem;
+        padding: 5px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Container */
+    .container {
+        padding: 10px;
+    }
+
+    /* Header */
+    header {
+        padding: 30px 15px;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    .subtitle {
+        font-size: 0.9rem;
+    }
+
+    /* Search Container */
+    .search-container {
+        padding: 20px 15px;
+    }
+
+    /* Buttons */
+    button {
+        padding: 12px 20px;
+        font-size: 0.95rem;
+    }
+
+    /* Station Header */
+    .station-header h3 {
+        font-size: 1.2rem;
+    }
+
+    /* Compact View */
+    .departure-compact {
+        grid-template-columns: auto 1fr;
+        gap: 8px;
+    }
+
+    .compact-time {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    /* Line Groups */
+    .line-group {
+        padding: 12px;
+    }
+
+    .line-group-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
+
+/* Tablet Specific */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        max-width: 900px;
+    }
+
+    #map {
+        height: 450px;
+    }
+
+    .departure-times {
+        gap: 8px;
+    }
+
+    .departure-time-item {
+        min-width: 120px;
+    }
+}
+
+/* Large Screens */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1400px;
+    }
+
+    header h1 {
+        font-size: 3rem;
+    }
+
+    .subtitle {
+        font-size: 1.2rem;
+    }
+}
