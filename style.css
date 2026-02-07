@@ -697,30 +697,103 @@ button:active {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
     margin-top: 6px;
     font-size: 0.9rem;
 }
 
 .time-planned-center {
-    padding: 4px 12px;
-    border-radius: 4px;
+    padding: 6px 14px;
+    border-radius: 6px;
     font-weight: 600;
     background: var(--bg-secondary);
     color: var(--text-secondary);
     font-size: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+/* Info Tooltip Container */
+.info-tooltip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
 }
 
 .info-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--primary-color);
     cursor: help;
-    font-size: 1.1rem;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
+    opacity: 0.6;
+    transition: all 0.3s ease;
     position: relative;
 }
 
 .info-icon:hover {
     opacity: 1;
+    transform: scale(1.15);
+}
+
+/* Modern CSS Tooltip */
+.tooltip-text {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-5px);
+    background: var(--background);
+    color: var(--text-primary);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    white-space: normal;
+    width: 280px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3),
+                0 0 0 1px var(--border-color);
+    z-index: 1000;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    text-align: left;
+}
+
+/* Tooltip Arrow */
+.tooltip-text::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--background);
+}
+
+.tooltip-text::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 7px solid transparent;
+    border-top-color: var(--border-color);
+    margin-top: 1px;
+    z-index: -1;
+}
+
+.info-tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Responsive tooltip positioning */
+@media (max-width: 768px) {
+    .tooltip-text {
+        width: 240px;
+        font-size: 0.8rem;
+        padding: 10px 14px;
+    }
 }
 
 .time-planned,

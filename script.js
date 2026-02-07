@@ -891,7 +891,13 @@ function formatDepartureTimes(planned, real) {
         return plannedTime ? `
             <div class="time-info time-info-planned-only">
                 <span class="time-planned-center">${plannedTime}</span>
-                <span class="info-icon" title="Planzeit - Keine bestätigten Echtzeit-Daten verfügbar. Diese Zeit basiert auf dem Fahrplan und wurde nicht durch Live-Daten von der Wiener Linien API verifiziert.">ℹ️</span>
+                <div class="info-tooltip">
+                    <svg class="info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span class="tooltip-text">Planzeit - Keine bestätigten Echtzeit-Daten verfügbar. Diese Zeit basiert auf dem Fahrplan und wurde nicht durch Live-Daten von der Wiener Linien API verifiziert.</span>
+                </div>
             </div>
         ` : '';
     }
