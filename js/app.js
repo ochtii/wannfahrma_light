@@ -180,6 +180,12 @@ function initStationSearch() {
 // Load Departures
 async function loadDepartures(station, isSilentRefresh = false) {
     if (!isSilentRefresh) {
+        // Switch to station tab to show results
+        const stationTabBtn = document.querySelector('[data-tab="station"]');
+        if (stationTabBtn && !stationTabBtn.classList.contains('active')) {
+            stationTabBtn.click();
+        }
+        
         showLoading(true);
         updateLoadingStatus('Initialisiere...');
         stopAutoRefresh(); // Stop old refresh

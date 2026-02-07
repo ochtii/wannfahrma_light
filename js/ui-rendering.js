@@ -309,7 +309,7 @@ export function updateFavoritesUI() {
     
     favoritesList.innerHTML = favorites.map(station => `
         <div class="favorite-item">
-            <div class="favorite-info" onclick="window.appHandlers.switchToStationTab('${station.name.replace(/'/g, "\\'")}')">
+            <div class="favorite-info" onclick="window.appHandlers.loadDeparturesForStation(${JSON.stringify(station).replace(/"/g, '&quot;')})">
                 <strong>${station.name}</strong>
                 <small>${station.municipality || ''}</small>
             </div>
