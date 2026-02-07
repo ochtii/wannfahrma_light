@@ -1,11 +1,23 @@
 /* Navigation: Tabs & Buttons */
 
+/* Mobile/Tablet Menu Elements - Hidden by default */
+.menu-controls,
+.menu-theme-toggle,
+.menu-device-mode {
+    display: none;
+}
+
 /* Tabs */
 .search-tabs {
     display: flex;
     gap: 10px;
     margin-bottom: 25px;
     border-bottom: 2px solid var(--border-color);
+}
+
+/* Remove ::before header in desktop mode */
+.search-tabs::before {
+    display: none;
 }
 
 .tab-btn {
@@ -18,6 +30,11 @@
     border-bottom: 3px solid transparent;
     transition: all 0.3s ease;
     font-weight: 500;
+}
+
+/* Remove data-icon attribute icons in desktop */
+.tab-btn::before {
+    display: none;
 }
 
 .tab-btn:hover {

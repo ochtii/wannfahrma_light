@@ -125,7 +125,7 @@ header h1 {
 /* Menu Header */
 .search-tabs::before {
     content: '⚙️ Einstellungen';
-    display: block;
+    display: block !important; /* Override desktop hiding */
     padding: 18px 28px;
     font-size: 0.9rem;
     font-weight: 700;
@@ -138,6 +138,7 @@ header h1 {
 
 /* Menu Controls */
 .menu-controls {
+    display: block; /* Override desktop hiding */
     padding: 0 20px;
     margin-bottom: 24px;
     border-bottom: 1px solid var(--border-color);
@@ -228,6 +229,7 @@ header h1 {
 
 .tab-btn::before {
     content: attr(data-icon);
+    display: inline-block !important; /* Override desktop hiding */
     font-size: 1.5rem;
 }
 
