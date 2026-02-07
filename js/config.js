@@ -13,7 +13,8 @@ export const STORAGE_KEYS = {
     FAVORITES: 'wl_favorites',
     RECENT: 'wl_recent_searches',
     VIEW_MODE: 'wl_view_mode',
-    THEME: 'theme'
+    THEME: 'theme',
+    DEVICE_MODE: 'wl_device_mode'
 };
 
 // Auto-refresh interval in milliseconds

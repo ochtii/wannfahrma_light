@@ -1,0 +1,470 @@
+/* Mobile Design - Komplett eigenständiges Design für Smartphones */
+
+/* Basis Container - Volle Breite für Mobile */
+.container {
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+/* Header - Kompakter für Mobile */
+header {
+    padding: 12px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--background);
+    border-bottom: 2px solid var(--primary-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    font-size: 1.3rem;
+    margin: 0 0 4px 0;
+}
+
+.subtitle {
+    font-size: 0.75rem;
+    margin: 0;
+}
+
+/* Theme Toggle Position */
+.theme-toggle {
+    top: 12px;
+    right: 60px;
+    width: 36px;
+    height: 36px;
+}
+
+/* Device Mode Toggle Position */
+.device-mode-toggle {
+    top: 12px;
+    right: 12px;
+}
+
+/* Search Container - Volle Breite */
+.search-container {
+    padding: 0;
+    margin: 0;
+    background: var(--bg-secondary);
+}
+
+/* Tabs - Horizontal scrollbar auf Mobile */
+.search-tabs {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.search-tabs::-webkit-scrollbar {
+    height: 2px;
+}
+
+.tab-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 14px 8px;
+    font-size: 0.85rem;
+    border: none;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+}
+
+.tab-btn.active {
+    border-bottom-color: var(--primary-color);
+    background: var(--background);
+}
+
+/* Tab Content */
+.tab-content {
+    padding: 12px;
+}
+
+/* Search Box - Touch-optimiert */
+.search-box {
+    flex-direction: column;
+    gap: 10px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 1rem;
+    border-radius: 8px;
+}
+
+.search-box button {
+    width: 100%;
+    padding: 14px;
+    font-size: 1rem;
+    border-radius: 8px;
+}
+
+/* Suggestions - Touch-optimiert */
+.suggestions {
+    margin-top: 12px;
+}
+
+.suggestion-item {
+    padding: 16px 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.suggestion-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.favorite-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+/* Recent Searches - Kompakt */
+.recent-searches {
+    margin-top: 16px;
+}
+
+.recent-searches h4 {
+    font-size: 0.9rem;
+    margin: 0 0 8px 0;
+    padding: 0 12px;
+}
+
+.recent-list {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 0 12px 8px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.recent-item-compact {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+}
+
+/* Favoriten - Touch-optimiert */
+.favorites-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.favorite-item {
+    padding: 16px 12px;
+    border-radius: 8px;
+}
+
+/* Nearby Controls - Stapellayout */
+.nearby-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.input-group {
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+}
+
+.nearby-controls button {
+    width: 100%;
+    padding: 14px;
+    font-size: 1rem;
+}
+
+/* Map - Volle Breite */
+#map {
+    height: 400px;
+    width: 100%;
+    border-radius: 0;
+}
+
+.map-info {
+    padding: 12px;
+    font-size: 0.85rem;
+}
+
+/* Results - Volle Breite */
+.results {
+    padding: 0;
+    margin: 0;
+}
+
+.welcome-message {
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.welcome-message h2 {
+    font-size: 1.5rem;
+}
+
+/* Station Card - Card-Design für Mobile */
+.station-card {
+    border-radius: 0;
+    border: none;
+    border-top: 4px solid var(--primary-color);
+    margin: 0;
+    background: var(--background);
+}
+
+.station-header {
+    padding: 16px;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.station-header-content {
+    width: 100%;
+}
+
+.station-header h3 {
+    font-size: 1.3rem;
+    margin: 0 0 4px 0;
+}
+
+.station-info {
+    font-size: 0.85rem;
+}
+
+.station-actions {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.view-toggle-btn,
+.favorite-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 1.3rem;
+}
+
+/* Departures - Mobile optimiert */
+.departures-grouped {
+    padding: 0;
+}
+
+/* Normal View - Karten-Design */
+.line-group {
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    margin: 0;
+    padding: 16px;
+}
+
+.line-group:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.line-group-header {
+    flex-direction: row;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.line-badge {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+}
+
+.line-icon {
+    font-size: 1.5rem;
+}
+
+.line-number {
+    font-size: 1.1rem;
+}
+
+.direction {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.platform {
+    font-size: 0.85rem;
+}
+
+/* Departure Times - Horizontal Scroll */
+.departure-times {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+}
+
+.departure-time-item {
+    flex-shrink: 0;
+    min-width: 140px;
+    padding: 12px;
+}
+
+.countdown {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+}
+
+.time-info {
+    font-size: 0.75rem;
+}
+
+/* Compact View - Liste für Mobile */
+.compact-view .departure-compact {
+    grid-template-columns: auto 1fr auto auto;
+    padding: 12px 16px;
+    gap: 10px;
+}
+
+.compact-line {
+    width: 50px;
+    height: 50px;
+    padding: 4px 6px;
+}
+
+.compact-icon {
+    font-size: 0.9rem;
+}
+
+.compact-number {
+    font-size: 0.85rem;
+}
+
+.compact-dest-name {
+    font-size: 0.9rem;
+}
+
+.compact-platform {
+    font-size: 0.7rem;
+}
+
+.compact-time-full {
+    font-size: 0.95rem;
+    text-align: right;
+}
+
+.compact-time-detail {
+    font-size: 0.75rem;
+    display: block;
+    margin-top: 2px;
+}
+
+.expand-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+}
+
+/* Loading - Fullscreen auf Mobile */
+.loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+}
+
+.progress-circle {
+    width: 100px;
+    height: 100px;
+}
+
+#loading-message {
+    font-size: 1rem;
+    padding: 0 20px;
+}
+
+/* Footer - Kompakt */
+footer {
+    padding: 20px 16px;
+    font-size: 0.8rem;
+}
+
+footer p {
+    margin: 8px 0;
+}
+
+/* Empty States */
+.empty-message {
+    padding: 40px 20px;
+}
+
+.empty-message h3 {
+    font-size: 1.2rem;
+}
+
+.empty-message p {
+    font-size: 0.9rem;
+}
+
+/* Touch-optimierte Buttons */
+button {
+    min-height: 44px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Scrollbar für Touch-Geräte */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+/* Prevent text selection during interaction */
+.tab-btn,
+.favorite-btn,
+.view-toggle-btn,
+.expand-btn,
+.theme-toggle,
+.device-mode-toggle {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Safe area for notched devices */
+@supports (padding: max(0px)) {
+    body {
+        padding-left: max(0px, env(safe-area-inset-left));
+        padding-right: max(0px, env(safe-area-inset-right));
+    }
+    
+    header {
+        padding-left: max(16px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
+    }
+}

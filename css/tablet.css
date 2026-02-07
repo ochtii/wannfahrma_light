@@ -1,0 +1,376 @@
+/* Tablet Design - Eigenständiges Design für Tablets */
+
+/* Container - Optimale Breite für Tablets */
+.container {
+    max-width: 100%;
+    padding: 0 24px;
+}
+
+/* Header - Größer als Mobile, kompakter als Desktop */
+header {
+    padding: 20px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--background);
+    border-bottom: 2px solid var(--primary-color);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    font-size: 1.8rem;
+    margin: 0 0 6px 0;
+}
+
+.subtitle {
+    font-size: 0.95rem;
+}
+
+/* Theme Toggle Position */
+.theme-toggle {
+    top: 20px;
+    right: 80px;
+    width: 40px;
+    height: 40px;
+}
+
+/* Device Mode Toggle Position */
+.device-mode-toggle {
+    top: 20px;
+    right: 24px;
+}
+
+/* Search Container */
+.search-container {
+    padding: 0;
+    margin: 20px 0;
+}
+
+/* Tabs - Grid Layout für Tablets */
+.search-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.tab-btn {
+    padding: 16px 12px;
+    font-size: 1rem;
+    border: none;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-btn.active {
+    border-bottom-color: var(--primary-color);
+}
+
+/* Tab Content */
+.tab-content {
+    padding: 20px;
+}
+
+/* Search Box - Zweispaltig */
+.search-box {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+}
+
+.search-box input {
+    padding: 14px 18px;
+    font-size: 1.05rem;
+}
+
+.search-box button {
+    padding: 14px 32px;
+    font-size: 1.05rem;
+    white-space: nowrap;
+}
+
+/* Suggestions - Zweispaltig */
+.suggestions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.suggestion-item {
+    padding: 16px;
+    border-radius: 10px;
+}
+
+/* Recent Searches - Grid */
+.recent-searches {
+    margin-top: 20px;
+}
+
+.recent-searches h4 {
+    font-size: 1rem;
+    margin-bottom: 12px;
+}
+
+.recent-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+}
+
+.recent-item-compact {
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+/* Favoriten - Grid Layout */
+.favorites-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.favorite-item {
+    padding: 18px 16px;
+    border-radius: 10px;
+}
+
+/* Nearby Controls - Zweispaltig */
+.nearby-controls {
+    display: grid;
+    gap: 16px;
+}
+
+.input-group {
+    display: grid;
+    grid-template-columns: 120px 1fr 1fr;
+    gap: 12px;
+    align-items: center;
+}
+
+.input-group:last-of-type {
+    grid-template-columns: 120px 1fr;
+}
+
+.input-group label {
+    font-weight: 600;
+}
+
+.nearby-controls button {
+    padding: 14px 24px;
+    font-size: 1.05rem;
+}
+
+#nearby-btn {
+    grid-column: 1 / -1;
+}
+
+#location-btn {
+    grid-column: 1 / -1;
+}
+
+/* Map - Größer für Tablets */
+#map {
+    height: 500px;
+    border-radius: 12px;
+}
+
+.map-info {
+    padding: 16px;
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+/* Results */
+.results {
+    padding: 0;
+    margin: 20px 0;
+}
+
+.welcome-message {
+    padding: 60px 40px;
+}
+
+.welcome-message h2 {
+    font-size: 2rem;
+}
+
+/* Station Card - Card mit Schatten */
+.station-card {
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.station-header {
+    padding: 20px;
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.station-header h3 {
+    font-size: 1.6rem;
+}
+
+.station-info {
+    font-size: 0.95rem;
+}
+
+.station-actions {
+    gap: 12px;
+}
+
+.view-toggle-btn,
+.favorite-btn {
+    width: 48px;
+    height: 48px;
+    font-size: 1.4rem;
+}
+
+/* Departures - Zweispaltig */
+.departures-grouped {
+    padding: 0 20px 20px;
+}
+
+/* Normal View - Grid für Tablets */
+.line-group {
+    margin-bottom: 16px;
+    border-radius: 10px;
+}
+
+.line-group-header {
+    gap: 16px;
+}
+
+.line-badge {
+    width: 70px;
+    height: 70px;
+}
+
+.line-icon {
+    font-size: 1.8rem;
+}
+
+.line-number {
+    font-size: 1.3rem;
+}
+
+.direction {
+    font-size: 1.15rem;
+}
+
+.platform {
+    font-size: 0.95rem;
+}
+
+/* Departure Times - Grid */
+.departure-times {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+}
+
+.departure-time-item {
+    padding: 14px;
+}
+
+.countdown {
+    font-size: 1.6rem;
+}
+
+.time-info {
+    font-size: 0.85rem;
+}
+
+/* Compact View - Optimiert für Tablets */
+.compact-view {
+    display: grid;
+    gap: 0;
+}
+
+.compact-view .departure-compact {
+    grid-template-columns: auto 1fr auto auto;
+    padding: 14px 20px;
+    gap: 16px;
+}
+
+.compact-line {
+    width: 60px;
+    height: 60px;
+}
+
+.compact-icon {
+    font-size: 1.1rem;
+}
+
+.compact-number {
+    font-size: 1rem;
+}
+
+.compact-dest-name {
+    font-size: 1rem;
+}
+
+.compact-platform {
+    font-size: 0.85rem;
+}
+
+.compact-time-full {
+    font-size: 1.1rem;
+}
+
+.compact-time-detail {
+    font-size: 0.85rem;
+}
+
+.expand-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+}
+
+/* Loading */
+.loading {
+    position: fixed;
+}
+
+.progress-circle {
+    width: 120px;
+    height: 120px;
+}
+
+/* Footer */
+footer {
+    padding: 30px 24px;
+    font-size: 0.9rem;
+}
+
+/* Empty States */
+.empty-message {
+    padding: 60px 40px;
+}
+
+.empty-message h3 {
+    font-size: 1.5rem;
+}
+
+/* Touch-optimierte Interaktionen */
+button {
+    min-height: 48px;
+    cursor: pointer;
+}
+
+/* Two-column layout für bestimmte Sections */
+@media (min-width: 768px) and (orientation: landscape) {
+    .favorites-list {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .recent-list {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+    
+    .suggestions {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
