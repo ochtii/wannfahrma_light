@@ -1,4 +1,4 @@
-/* Mobile Design - Komplett eigenständiges Design für Smartphones */
+/* Mobile Design - Modernes, kompaktes Design mit Hamburger-Menü */
 
 /* Basis Container - Volle Breite für Mobile */
 .container {
@@ -7,39 +7,653 @@
     margin: 0;
 }
 
-/* Header - Kompakter für Mobile */
+/* Header - Modern & Kompakt */
 header {
-    padding: 12px 16px;
+    padding: 14px 16px;
     position: sticky;
     top: 0;
     z-index: 100;
     background: var(--background);
-    border-bottom: 2px solid var(--primary-color);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
 header h1 {
-    font-size: 1.3rem;
-    margin: 0 0 4px 0;
+    font-size: 1.2rem;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: -0.3px;
 }
 
 .subtitle {
-    font-size: 0.75rem;
-    margin: 0;
+    display: none; /* Subtitle ausblenden für mehr Platz */
+}
+
+/* Hamburger Menu Button */
+.hamburger-btn {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    z-index: 1001;
+    padding: 0;
+}
+
+.hamburger-btn span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--text-primary);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.hamburger-btn.active span:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+}
+
+.hamburger-btn.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-btn.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
 }
 
 /* Theme Toggle Position */
 .theme-toggle {
-    top: 12px;
+    top: 14px;
     right: 60px;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
 }
 
 /* Device Mode Toggle Position */
 .device-mode-toggle {
-    top: 12px;
-    right: 12px;
+    top: 14px;
+    right: 14px;
+}
+
+.device-mode-current {
+    width: 40px;
+    height: 40px;
+}
+
+/* Mobile Navigation Overlay */
+.mobile-nav-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 998;
+}
+
+.mobile-nav-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Search Container */
+.search-container {
+    padding: 0;
+    margin: 0;
+    background: var(--background);
+}
+
+/* Mobile Sidebar Navigation */
+.search-tabs {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100%;
+    background: var(--background);
+    box-shadow: 2px 0 16px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow-y: auto;
+    transition: left 0.3s ease;
+    z-index: 999;
+    padding-top: 70px;
+    border-right: 1px solid var(--border-color);
+}
+
+.search-tabs.active {
+    left: 0;
+}
+
+.tab-btn {
+    flex: none;
+    width: 100%;
+    padding: 18px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-left: 4px solid transparent;
+    white-space: nowrap;
+    text-align: left;
+    background: transparent;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tab-btn::before {
+    content: attr(data-icon);
+    font-size: 1.3rem;
+}
+
+.tab-btn[data-tab="station"]::before { content: "🚏"; }
+.tab-btn[data-tab="favorites"]::before { content: "⭐"; }
+.tab-btn[data-tab="nearby"]::before { content: "📍"; }
+
+.tab-btn.active {
+    border-left-color: var(--primary-color);
+    background: var(--bg-secondary);
+    color: var(--primary-color);
+}
+
+/* Tab Content */
+.tab-content {
+    padding: 16px;
+    background: var(--bg-secondary);
+    min-height: calc(100vh - 70px);
+}
+
+/* Search Box - Touch-optimiert */
+.search-box {
+    flex-direction: column;
+    gap: 12px;
+    background: var(--background);
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.search-box input {
+    width: 100%;
+    padding: 15px 16px;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: 2px solid var(--border-color);
+}
+
+.search-box input:focus {
+    border-color: var(--primary-color);
+}
+
+.search-box button {
+    width: 100%;
+    padding: 15px;
+    font-size: 1rem;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+/* Suggestions - Card Design */
+.suggestions {
+    margin-top: 16px;
+}
+
+.suggestion-item {
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    background: var(--background);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--border-color);
+}
+
+.suggestion-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.suggestion-info strong {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.suggestion-info small {
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+
+.favorite-btn {
+    width: 48px;
+    height: 48px;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    border-radius: 10px;
+}
+
+/* Recent Searches - Kompakt mit Cards */
+.recent-searches {
+    margin-top: 20px;
+}
+
+.recent-searches h4 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 12px 0;
+    padding: 0;
+    color: var(--text-secondary);
+}
+
+.recent-list {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.recent-item-compact {
+    flex-shrink: 0;
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    background: var(--background);
+    border-radius: 20px;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* Favoriten - Touch-optimiert */
+.favorites-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.favorite-item {
+    padding: 18px 16px;
+    border-radius: 12px;
+    background: var(--background);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--border-color);
+}
+
+/* Nearby Controls - Stapellayout */
+.nearby-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: var(--background);
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.input-group {
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-group label {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: 2px solid var(--border-color);
+}
+
+.nearby-controls button {
+    width: 100%;
+    padding: 15px;
+    font-size: 1rem;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+/* Map - Volle Breite */
+#map {
+    height: 350px;
+    width: 100%;
+    border-radius: 12px;
+    margin-top: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.map-info {
+    padding: 12px 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Results - Volle Breite */
+.results {
+    padding: 0;
+    margin: 0;
+    background: var(--bg-secondary);
+    min-height: calc(100vh - 70px);
+}
+
+.welcome-message {
+    padding: 60px 24px;
+    text-align: center;
+}
+
+.welcome-message h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.welcome-message p {
+    font-size: 0.95rem;
+    opacity: 0.7;
+}
+
+/* Station Card - Modern Card Design */
+.station-card {
+    border-radius: 16px;
+    border: none;
+    margin: 16px;
+    background: var(--background);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.station-header {
+    padding: 20px 16px;
+    flex-direction: column;
+    gap: 14px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.station-header-content {
+    width: 100%;
+}
+
+.station-header h3 {
+    font-size: 1.4rem;
+    margin: 0 0 6px 0;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+.station-info {
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+
+.station-actions {
+    width: 100%;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.view-toggle-btn,
+.favorite-btn {
+    width: 48px;
+    height: 48px;
+    font-size: 1.4rem;
+    border-radius: 12px;
+}
+
+/* Departures - Mobile optimiert */
+.departures-grouped {
+    padding: 0;
+}
+
+/* Normal View - Karten-Design */
+.line-group {
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    margin: 0;
+    padding: 18px 16px;
+}
+
+.line-group:last-child {
+    border-bottom: none;
+}
+
+.line-group:hover {
+    transform: none;
+    background: var(--bg-secondary);
+}
+
+.line-group-header {
+    flex-direction: row;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.line-badge {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.line-icon {
+    font-size: 1.4rem;
+}
+
+.line-number {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.direction {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.platform {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+/* Departure Times - Horizontal Scroll */
+.departure-times {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+    margin-top: 4px;
+}
+
+.departure-time-item {
+    flex-shrink: 0;
+    min-width: 150px;
+    padding: 14px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.countdown {
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+
+.time-info {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+/* Compact View - Liste für Mobile */
+.compact-view .departure-compact {
+    grid-template-columns: auto 1fr auto auto;
+    padding: 14px 16px;
+    gap: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.compact-view .departure-compact:last-child {
+    border-bottom: none;
+}
+
+.compact-line {
+    width: 52px;
+    height: 52px;
+    padding: 6px 8px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.compact-icon {
+    font-size: 0.95rem;
+}
+
+.compact-number {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.compact-dest-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.compact-platform {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+.compact-time-full {
+    font-size: 1rem;
+    text-align: right;
+    font-weight: 700;
+}
+
+.compact-time-detail {
+    font-size: 0.75rem;
+    display: block;
+    margin-top: 3px;
+    opacity: 0.7;
+}
+
+.expand-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    border-radius: 10px;
+}
+
+/* Loading - Fullscreen auf Mobile */
+.loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+}
+
+.progress-circle {
+    width: 100px;
+    height: 100px;
+}
+
+#loading-message {
+    font-size: 1rem;
+    padding: 0 24px;
+}
+
+/* Footer - Kompakt */
+footer {
+    padding: 24px 16px;
+    font-size: 0.8rem;
+    background: var(--background);
+}
+
+footer p {
+    margin: 8px 0;
+}
+
+/* Empty States */
+.empty-message {
+    padding: 60px 24px;
+    text-align: center;
+}
+
+.empty-message h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.empty-message p {
+    font-size: 0.95rem;
+    opacity: 0.7;
+}
+
+/* Touch-optimierte Buttons */
+button {
+    min-height: 48px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Scrollbar für Touch-Geräte */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 3px;
+}
+
+/* Prevent text selection during interaction */
+.tab-btn,
+.favorite-btn,
+.view-toggle-btn,
+.expand-btn,
+.theme-toggle,
+.device-mode-toggle,
+.hamburger-btn {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Safe Area für Geräte mit Notch */
+@supports (padding: env(safe-area-inset-top)) {
+    header {
+        padding-top: calc(14px + env(safe-area-inset-top));
+    }
+    
+    .search-tabs {
+        padding-top: calc(70px + env(safe-area-inset-top));
+    }
 }
 
 /* Search Container - Volle Breite */

@@ -48,6 +48,12 @@ header h1 {
     display: none;
 }
 
+/* Mobile Menu Elements - Hidden by default */
+.hamburger-btn,
+.mobile-nav-overlay {
+    display: none;
+}
+
 .theme-toggle .icon-dark {
     display: inline;
 }

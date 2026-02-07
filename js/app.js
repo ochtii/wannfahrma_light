@@ -49,8 +49,54 @@ async function initializeApp() {
     initMap();
     initThemeToggle();
     initDeviceModeToggle();
+    initMobileMenu();
     updateFavoritesUI();
     updateRecentSearchesUI();
+}
+
+// Mobile Hamburger Menu
+function initMobileMenu() {
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const navOverlay = document.getElementById('mobile-nav-overlay');
+    const searchTabs = document.querySelector('.search-tabs');
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    
+    if (!hamburgerBtn) return; // Nur für Mobile
+    
+    // Toggle Menu
+    function toggleMenu(show) {
+        if (show) {
+            hamburgerBtn.classList.add('active');
+            searchTabs.classList.add('active');
+            navOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        } else {
+            hamburgerBtn.classList.remove('active');
+            searchTabs.classList.remove('active');
+            navOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+    
+    // Hamburger Button Click
+    hamburgerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isActive = hamburgerBtn.classList.contains('active');
+        toggleMenu(!isActive);
+    });
+    
+    // Overlay Click - Close Menu
+    navOverlay.addEventListener('click', () => {
+        toggleMenu(false);
+    });
+    
+    // Tab Click - Close Menu
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Kleines Delay damit Tab-Wechsel sichtbar ist
+            setTimeout(() => toggleMenu(false), 100);
+        });
+    });
 }
 
 // Theme Toggle
