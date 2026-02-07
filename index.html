@@ -61,8 +61,23 @@
 
         <div class="search-container">
             <div class="search-tabs">
+                <div class="menu-controls">
+                    <button class="menu-theme-toggle" id="menu-theme-toggle">
+                        <span>Theme</span>
+                        <span class="toggle-icon" id="menu-theme-icon">🌙</span>
+                    </button>
+                    <div class="menu-device-mode">
+                        <span>Ansicht</span>
+                        <div class="mode-icons">
+                            <button class="mode-icon-btn" data-mode="auto" title="Auto">🔄</button>
+                            <button class="mode-icon-btn" data-mode="desktop" title="Desktop">💻</button>
+                            <button class="mode-icon-btn" data-mode="tablet" title="Tablet">📱</button>
+                            <button class="mode-icon-btn" data-mode="mobile" title="Mobile">📱</button>
+                        </div>
+                    </div>
+                </div>
                 <button class="tab-btn active" data-tab="station">Stationssuche</button>
-                <button class="tab-btn" data-tab="favorites">⭐ Favoriten</button>
+                <button class="tab-btn" data-tab="favorites">Favoriten</button>
                 <button class="tab-btn" data-tab="nearby">Umkreissuche</button>
                 <button class="tab-btn" data-tab="map">Karte</button>
             </div>

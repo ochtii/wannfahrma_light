@@ -60,6 +60,9 @@ function initMobileMenu() {
     const navOverlay = document.getElementById('mobile-nav-overlay');
     const searchTabs = document.querySelector('.search-tabs');
     const tabBtns = document.querySelectorAll('.tab-btn');
+    const menuThemeToggle = document.getElementById('menu-theme-toggle');
+    const menuThemeIcon = document.getElementById('menu-theme-icon');
+    const menuDeviceBtns = document.querySelectorAll('.mode-icon-btn');
     
     if (!hamburgerBtn) return; // Nur für Mobile
     
@@ -97,6 +100,41 @@ function initMobileMenu() {
             setTimeout(() => toggleMenu(false), 100);
         });
     });
+    
+    // Menu Theme Toggle
+    if (menuThemeToggle) {
+        menuThemeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem(STORAGE_KEYS.THEME, isDark ? 'dark' : 'light');
+            menuThemeIcon.textContent = isDark ? '🌙' : '☀️';
+        });
+        
+        // Initial icon
+        const isDark = document.body.classList.contains('dark-mode');
+        menuThemeIcon.textContent = isDark ? '🌙' : '☀️';
+    }
+    
+    // Menu Device Mode Buttons
+    if (menuDeviceBtns.length > 0) {
+        const savedMode = localStorage.getItem(STORAGE_KEYS.DEVICE_MODE) || 'auto';
+        
+        // Update active states
+        menuDeviceBtns.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.mode === savedMode);
+            
+            btn.addEventListener('click', () => {
+                const mode = btn.dataset.mode;
+                localStorage.setItem(STORAGE_KEYS.DEVICE_MODE, mode);
+                
+                // Update active states
+                menuDeviceBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+                
+                // Trigger device mode change (wird von initDeviceModeToggle gehört)
+                window.dispatchEvent(new CustomEvent('deviceModeChange', { detail: { mode } }));
+            });
+        });
+    }
 }
 
 // Theme Toggle
@@ -139,8 +177,10 @@ function initDeviceModeToggle() {
     let deviceMode = localStorage.getItem(STORAGE_KEYS.DEVICE_MODE) || 'auto';
     
     // Auto-detection for responsive mode
+    let currentAutoMode = null;
+    
     function startAutoDetection() {
-        const detectScreenSize = () => {
+        const detectAndApplyScreenSize = () => {
             const width = window.innerWidth;
             let detectedMode;
             
@@ -153,17 +193,61 @@ function initDeviceModeToggle() {
             }
             
             console.log(`📐 Auto-Detection: ${width}px → ${detectedMode}`);
-            return detectedMode;
+            
+            // Nur CSS ändern wenn sich der Modus geändert hat
+            if (currentAutoMode !== detectedMode) {
+                currentAutoMode = detectedMode;
+                applyAutoDetectedCSS(detectedMode);
+            }
         };
         
-        detectScreenSize();
-        autoDetectionInterval = setInterval(detectScreenSize, 2000);
+        detectAndApplyScreenSize();
+        autoDetectionInterval = setInterval(detectAndApplyScreenSize, 1000);
+    }
+    
+    function applyAutoDetectedCSS(detectedMode) {
+        const mobileCSS = document.getElementById('mobile-css');
+        const tabletCSS = document.getElementById('tablet-css');
+        const responsiveCSS = document.querySelector('link[href="css/responsive.css"]');
+        
+        // Alle device-specific CSS entfernen
+        if (mobileCSS) mobileCSS.remove();
+        if (tabletCSS) tabletCSS.remove();
+        
+        if (detectedMode === 'mobile') {
+            // Mobile CSS laden
+            if (responsiveCSS) responsiveCSS.disabled = true;
+            if (!document.getElementById('mobile-css')) {
+                const link = document.createElement('link');
+                link.id = 'mobile-css';
+                link.rel = 'stylesheet';
+                link.href = 'css/mobile.css';
+                document.head.appendChild(link);
+                console.log('📱 Auto: Mobile CSS geladen');
+            }
+        } else if (detectedMode === 'tablet') {
+            // Tablet CSS laden
+            if (responsiveCSS) responsiveCSS.disabled = true;
+            if (!document.getElementById('tablet-css')) {
+                const link = document.createElement('link');
+                link.id = 'tablet-css';
+                link.rel = 'stylesheet';
+                link.href = 'css/tablet.css';
+                document.head.appendChild(link);
+                console.log('📱 Auto: Tablet CSS geladen');
+            }
+        } else {
+            // Desktop - nur responsive.css
+            if (responsiveCSS) responsiveCSS.disabled = false;
+            console.log('💻 Auto: Desktop CSS aktiv');
+        }
     }
     
     function stopAutoDetection() {
         if (autoDetectionInterval) {
             clearInterval(autoDetectionInterval);
             autoDetectionInterval = null;
+            currentAutoMode = null;
         }
     }
     
@@ -195,6 +279,13 @@ function initDeviceModeToggle() {
         });
     });
     
+    // Listen to menu device mode changes
+    window.addEventListener('deviceModeChange', (e) => {
+        const mode = e.detail.mode;
+        deviceMode = mode;
+        applyDeviceMode(mode);
+    });
+    
     // Update active state and apply CSS
     function applyDeviceMode(mode) {
         // Update body attribute
@@ -206,6 +297,12 @@ function initDeviceModeToggle() {
         // Update active option
         options.forEach(opt => {
             opt.classList.toggle('active', opt.dataset.mode === mode);
+        });
+        
+        // Update menu device buttons (for mobile/tablet)
+        const menuDeviceBtns = document.querySelectorAll('.mode-icon-btn');
+        menuDeviceBtns.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.mode === mode);
         });
         
         // Apply CSS based on mode
