@@ -8,7 +8,8 @@ import {
     getAutoRefreshInterval,
     setAutoRefreshInterval,
     getFavorites,
-    getRecentSearches
+    getRecentSearches,
+    getMap
 } from './state.js';
 import { loadStations, searchStations, searchNearbyStations } from './stations.js';
 import { loadFavorites, toggleFavorite } from './favorites.js';
