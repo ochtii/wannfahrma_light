@@ -332,6 +332,6 @@ export function updateRecentSearchesUI() {
     
     recentSearchesDiv.classList.remove('hidden');
     recentList.innerHTML = recentSearches.map(station => `
-        <div class="recent-item-compact" onclick="window.appHandlers.switchToStationTab('${station.name.replace(/'/g, "\\'")}')">${station.name}</div>
+        <div class="recent-item-compact" onclick="window.appHandlers.loadDeparturesForStation(${JSON.stringify(station).replace(/"/g, '&quot;')})">${station.name}</div>
     `).join('');
 }

@@ -184,6 +184,12 @@ async function loadDepartures(station, isSilentRefresh = false) {
         updateLoadingStatus('Initialisiere...');
         stopAutoRefresh(); // Stop old refresh
         setCurrentStation(station); // Update current station
+        
+        // Clear suggestions when loading departures
+        const suggestions = document.getElementById('suggestions');
+        if (suggestions) {
+            suggestions.innerHTML = '';
+        }
     }
     
     try {
