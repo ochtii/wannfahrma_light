@@ -692,6 +692,37 @@ button:active {
     flex-wrap: wrap;
 }
 
+/* Nur Planzeit - zentriert mit Info-Icon */
+.time-info-planned-only {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 6px;
+    font-size: 0.9rem;
+}
+
+.time-planned-center {
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-weight: 600;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.info-icon {
+    cursor: help;
+    font-size: 1.1rem;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    position: relative;
+}
+
+.info-icon:hover {
+    opacity: 1;
+}
+
 .time-planned,
 .time-real,
 .time-diff {

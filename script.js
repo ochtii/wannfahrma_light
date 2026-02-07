@@ -888,7 +888,12 @@ function formatDepartureTimes(planned, real) {
     const realTime = formatTime(real);
     
     if (!realTime || !planned || !real) {
-        return plannedTime ? `<div class="time-info">Plan: ${plannedTime}</div>` : '';
+        return plannedTime ? `
+            <div class="time-info time-info-planned-only">
+                <span class="time-planned-center">${plannedTime}</span>
+                <span class="info-icon" title="Planzeit - Keine bestätigten Echtzeit-Daten verfügbar. Diese Zeit basiert auf dem Fahrplan und wurde nicht durch Live-Daten von der Wiener Linien API verifiziert.">ℹ️</span>
+            </div>
+        ` : '';
     }
     
     const diff = Math.round((new Date(real) - new Date(planned)) / 60000);
