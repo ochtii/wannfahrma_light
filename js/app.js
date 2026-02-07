@@ -37,6 +37,12 @@ async function initializeApp() {
         setViewMode(savedViewMode);
     }
     
+    // Expose state for UI components BEFORE calling UI updates
+    window.appState = {
+        get favorites() { return getFavorites(); },
+        get recentSearches() { return getRecentSearches(); }
+    };
+    
     initTabs();
     initStationSearch();
     initNearbySearch();
@@ -44,12 +50,6 @@ async function initializeApp() {
     initThemeToggle();
     updateFavoritesUI();
     updateRecentSearchesUI();
-    
-    // Expose state for UI components
-    window.appState = {
-        get favorites() { return getFavorites(); },
-        get recentSearches() { return getRecentSearches(); }
-    };
 }
 
 // Theme Toggle
