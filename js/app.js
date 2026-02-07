@@ -210,6 +210,18 @@ function initDeviceModeToggle() {
         const tabletCSS = document.getElementById('tablet-css');
         const responsiveCSS = document.querySelector('link[href="css/responsive.css"]');
         
+        // Menü schließen falls offen (verhindert Scroll-Lock)
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const searchTabs = document.querySelector('.search-tabs');
+        const navOverlay = document.getElementById('mobile-nav-overlay');
+        
+        if (hamburgerBtn && hamburgerBtn.classList.contains('active')) {
+            hamburgerBtn.classList.remove('active');
+            searchTabs.classList.remove('active');
+            navOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
         // Alle device-specific CSS entfernen
         if (mobileCSS) mobileCSS.remove();
         if (tabletCSS) tabletCSS.remove();
@@ -239,6 +251,8 @@ function initDeviceModeToggle() {
         } else {
             // Desktop - nur responsive.css
             if (responsiveCSS) responsiveCSS.disabled = false;
+            // Ensure overflow is reset for desktop
+            document.body.style.overflow = '';
             console.log('💻 Auto: Desktop CSS aktiv');
         }
     }
@@ -305,6 +319,18 @@ function initDeviceModeToggle() {
             btn.classList.toggle('active', btn.dataset.mode === mode);
         });
         
+        // Menü schließen bei Modus-Wechsel
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const searchTabs = document.querySelector('.search-tabs');
+        const navOverlay = document.getElementById('mobile-nav-overlay');
+        
+        if (hamburgerBtn && hamburgerBtn.classList.contains('active')) {
+            hamburgerBtn.classList.remove('active');
+            searchTabs.classList.remove('active');
+            navOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
         // Apply CSS based on mode
         const mobileCSS = document.getElementById('mobile-css');
         const tabletCSS = document.getElementById('tablet-css');
@@ -315,6 +341,8 @@ function initDeviceModeToggle() {
             if (mobileCSS) mobileCSS.remove();
             if (tabletCSS) tabletCSS.remove();
             if (responsiveCSS) responsiveCSS.disabled = false;
+            // Ensure overflow is reset
+            document.body.style.overflow = '';
             startAutoDetection();
             console.log('✅ Auto-Modus aktiv - Responsive CSS wird verwendet');
         } else {
@@ -349,6 +377,8 @@ function initDeviceModeToggle() {
                 if (mobileCSS) mobileCSS.remove();
                 if (tabletCSS) tabletCSS.remove();
                 if (responsiveCSS) responsiveCSS.disabled = false;
+                // Ensure overflow is reset for desktop
+                document.body.style.overflow = '';
                 console.log('💻 Desktop CSS aktiv');
             }
         }
