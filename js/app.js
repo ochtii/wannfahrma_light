@@ -72,7 +72,19 @@ function initThemeToggle() {
 
 // Device Mode Toggle
 function initDeviceModeToggle() {
-    const buttons = document.querySelectorAll('.device-mode-btn');
+    const toggle = document.getElementById('device-mode-toggle');
+    const currentBtn = document.getElementById('device-mode-current');
+    const currentIcon = currentBtn.querySelector('.current-icon');
+    const menu = document.getElementById('device-mode-menu');
+    const options = document.querySelectorAll('.device-mode-option');
+    
+    // Mode icons
+    const modeIcons = {
+        auto: '🔄',
+        desktop: '💻',
+        tablet: '📱',
+        mobile: '📱'
+    };
     
     // Load saved device mode or default to auto
     let deviceMode = localStorage.getItem(STORAGE_KEYS.DEVICE_MODE) || 'auto';
@@ -80,24 +92,72 @@ function initDeviceModeToggle() {
     // Apply device mode on init
     applyDeviceMode(deviceMode);
     
-    // Handle button clicks
-    buttons.forEach(button => {
-        button.addEventListener('click', () => {
-            const mode = button.dataset.mode;
+    // Toggle dropdown
+    currentBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggle.classList.toggle('active');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!toggle.contains(e.target)) {
+            toggle.classList.remove('active');
+        }
+    });
+    
+    // Handle option selection
+    options.forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const mode = option.dataset.mode;
             deviceMode = mode;
             localStorage.setItem(STORAGE_KEYS.DEVICE_MODE, mode);
             applyDeviceMode(mode);
+            toggle.classList.remove('active');
         });
     });
+    
+    // Auto-detection for responsive mode
+    let autoDetectionInterval;
+    function startAutoDetection() {
+        const detectScreenSize = () => {
+            const width = window.innerWidth;
+            let detectedMode;
+            
+            if (width <= 768) {
+                detectedMode = 'mobile';
+            } else if (width <= 1024) {
+                detectedMode = 'tablet';
+            } else {
+                detectedMode = 'desktop';
+            }
+            
+            console.log(`📐 Auto-Detection: ${width}px → ${detectedMode}`);
+            return detectedMode;
+        };
+        
+        detectScreenSize();
+        autoDetectionInterval = setInterval(detectScreenSize, 2000);
+    }
+    
+    function stopAutoDetection() {
+        if (autoDetectionInterval) {
+            clearInterval(autoDetectionInterval);
+            autoDetectionInterval = null;
+        }
+    }
     
     // Update active state and apply CSS
     function applyDeviceMode(mode) {
         // Update body attribute
         document.body.setAttribute('data-device-mode', mode);
         
-        // Update active button
-        buttons.forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.mode === mode);
+        // Update current icon
+        currentIcon.textContent = modeIcons[mode];
+        
+        // Update active option
+        options.forEach(opt => {
+            opt.classList.toggle('active', opt.dataset.mode === mode);
         });
         
         // Apply CSS based on mode
@@ -106,37 +166,46 @@ function initDeviceModeToggle() {
         const responsiveCSS = document.querySelector('link[href="css/responsive.css"]');
         
         if (mode === 'auto') {
-            // Let responsive.css handle it
+            // Let responsive.css handle it + start auto-detection logging
             if (mobileCSS) mobileCSS.remove();
             if (tabletCSS) tabletCSS.remove();
             if (responsiveCSS) responsiveCSS.disabled = false;
-        } else if (mode === 'mobile') {
-            // Force mobile view - enable mobile.css
-            if (responsiveCSS) responsiveCSS.disabled = true;
-            if (tabletCSS) tabletCSS.remove();
-            if (!document.getElementById('mobile-css')) {
-                const link = document.createElement('link');
-                link.id = 'mobile-css';
-                link.rel = 'stylesheet';
-                link.href = 'css/mobile.css';
-                document.head.appendChild(link);
-            }
-        } else if (mode === 'tablet') {
-            // Force tablet view - enable tablet.css
-            if (responsiveCSS) responsiveCSS.disabled = true;
-            if (mobileCSS) mobileCSS.remove();
-            if (!document.getElementById('tablet-css')) {
-                const link = document.createElement('link');
-                link.id = 'tablet-css';
-                link.rel = 'stylesheet';
-                link.href = 'css/tablet.css';
-                document.head.appendChild(link);
-            }
+            startAutoDetection();
+            console.log('✅ Auto-Modus aktiv - Responsive CSS wird verwendet');
         } else {
-            // Desktop mode - use responsive.css only
-            if (mobileCSS) mobileCSS.remove();
-            if (tabletCSS) tabletCSS.remove();
-            if (responsiveCSS) responsiveCSS.disabled = false;
+            stopAutoDetection();
+            
+            if (mode === 'mobile') {
+                // Force mobile view - enable mobile.css
+                if (responsiveCSS) responsiveCSS.disabled = true;
+                if (tabletCSS) tabletCSS.remove();
+                if (!document.getElementById('mobile-css')) {
+                    const link = document.createElement('link');
+                    link.id = 'mobile-css';
+                    link.rel = 'stylesheet';
+                    link.href = 'css/mobile.css';
+                    document.head.appendChild(link);
+                    console.log('📱 Mobile CSS geladen');
+                }
+            } else if (mode === 'tablet') {
+                // Force tablet view - enable tablet.css
+                if (responsiveCSS) responsiveCSS.disabled = true;
+                if (mobileCSS) mobileCSS.remove();
+                if (!document.getElementById('tablet-css')) {
+                    const link = document.createElement('link');
+                    link.id = 'tablet-css';
+                    link.rel = 'stylesheet';
+                    link.href = 'css/tablet.css';
+                    document.head.appendChild(link);
+                    console.log('📱 Tablet CSS geladen');
+                }
+            } else {
+                // Desktop mode - use responsive.css only
+                if (mobileCSS) mobileCSS.remove();
+                if (tabletCSS) tabletCSS.remove();
+                if (responsiveCSS) responsiveCSS.disabled = false;
+                console.log('💻 Desktop CSS aktiv');
+            }
         }
         
         console.log(`🖥️ Device mode: ${mode}`);
