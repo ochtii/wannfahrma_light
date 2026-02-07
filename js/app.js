@@ -132,8 +132,40 @@ function initDeviceModeToggle() {
         mobile: '📱'
     };
     
+    // Auto-detection interval variable
+    let autoDetectionInterval = null;
+    
     // Load saved device mode or default to auto
     let deviceMode = localStorage.getItem(STORAGE_KEYS.DEVICE_MODE) || 'auto';
+    
+    // Auto-detection for responsive mode
+    function startAutoDetection() {
+        const detectScreenSize = () => {
+            const width = window.innerWidth;
+            let detectedMode;
+            
+            if (width <= 768) {
+                detectedMode = 'mobile';
+            } else if (width <= 1024) {
+                detectedMode = 'tablet';
+            } else {
+                detectedMode = 'desktop';
+            }
+            
+            console.log(`📐 Auto-Detection: ${width}px → ${detectedMode}`);
+            return detectedMode;
+        };
+        
+        detectScreenSize();
+        autoDetectionInterval = setInterval(detectScreenSize, 2000);
+    }
+    
+    function stopAutoDetection() {
+        if (autoDetectionInterval) {
+            clearInterval(autoDetectionInterval);
+            autoDetectionInterval = null;
+        }
+    }
     
     // Apply device mode on init
     applyDeviceMode(deviceMode);
@@ -162,36 +194,6 @@ function initDeviceModeToggle() {
             toggle.classList.remove('active');
         });
     });
-    
-    // Auto-detection for responsive mode
-    let autoDetectionInterval;
-    function startAutoDetection() {
-        const detectScreenSize = () => {
-            const width = window.innerWidth;
-            let detectedMode;
-            
-            if (width <= 768) {
-                detectedMode = 'mobile';
-            } else if (width <= 1024) {
-                detectedMode = 'tablet';
-            } else {
-                detectedMode = 'desktop';
-            }
-            
-            console.log(`📐 Auto-Detection: ${width}px → ${detectedMode}`);
-            return detectedMode;
-        };
-        
-        detectScreenSize();
-        autoDetectionInterval = setInterval(detectScreenSize, 2000);
-    }
-    
-    function stopAutoDetection() {
-        if (autoDetectionInterval) {
-            clearInterval(autoDetectionInterval);
-            autoDetectionInterval = null;
-        }
-    }
     
     // Update active state and apply CSS
     function applyDeviceMode(mode) {
